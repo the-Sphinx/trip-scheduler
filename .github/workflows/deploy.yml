@@ -36,6 +36,18 @@ jobs:
           VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.VITE_GOOGLE_MAPS_API_KEY }}
           VITE_OPENWEATHER_API_KEY: ${{ secrets.VITE_OPENWEATHER_API_KEY }}
 
+      - name: Encrypt index.html with staticrypt
+        run: |
+          npx -y staticrypt dist/index.html \
+            -p "$STATICRYPT_PASSWORD" \
+            --short --remember 30 \
+            -d dist-encrypted
+          mv dist/index.html dist/index.html.plain
+          mv dist-encrypted/index.html dist/index.html
+          rm -f dist/index.html.plain
+        env:
+          STATICRYPT_PASSWORD: ${{ secrets.STATICRYPT_PASSWORD }}
+
       - uses: actions/configure-pages@v4
 
       - uses: actions/upload-pages-artifact@v3

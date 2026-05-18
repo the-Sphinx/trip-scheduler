@@ -9,7 +9,15 @@
       "Bash(npx tsx *)",
       "Bash(gh auth *)",
       "Bash(git init *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(gh repo *)",
+      "Bash(gh api *)",
+      "Bash(git push *)",
+      "Bash(gh run *)",
+      "Bash(npm install *)",
+      "Bash(npx -y staticrypt dist/index.html -p \"AdaDeniz\" --short --remember 30 -d dist-encrypted)",
+      "Bash(gh secret *)"
     ]
   }
 }
