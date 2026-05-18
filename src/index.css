@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #1e40af;
+  --color-primary-light: #3b82f6;
+  --color-secondary: #dc2626;
+  --color-accent: #f59e0b;
+  --color-surface: #1e293b;
+  --color-surface-light: #334155;
+  --color-background: #0f172a;
+  --color-text: #f1f5f9;
+  --color-text-muted: #94a3b8;
+}
+
+body {
+  @apply bg-background text-text min-h-screen;
+}
+
+/* Swiper overrides */
+.swiper {
+  @apply w-full h-full;
+}

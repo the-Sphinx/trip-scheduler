@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(mkdir -p /tmp/trip-test)",
+      "Read(//tmp/**)",
+      "Bash(curl *)",
+      "Bash(env)",
+      "Bash(npx tsx *)",
+      "Bash(gh auth *)",
+      "Bash(git init *)",
+      "Bash(git add *)"
+    ]
+  }
+}
