@@ -28,6 +28,16 @@ function toRow(d: Draft): (string | number | boolean)[] {
   return [d.hasBought ? 'TRUE' : '', d.item, d.brand, d.location, d.count, d.price, d.to, d.notes];
 }
 
+// Sheet stores price in JPY. Display: "<X> TRY (<Y> ¥)".
+const YEN_TO_TRY = 0.30;
+function formatPrice(raw: string): string {
+  const num = parseFloat((raw || '').replace(/[^0-9.]/g, ''));
+  if (!num || isNaN(num)) return raw;
+  const try_ = Math.round(num * YEN_TO_TRY);
+  const yen = Math.round(num);
+  return `${try_.toLocaleString()} TRY (${yen.toLocaleString()} ¥)`;
+}
+
 // Optimistic UI state — each row is either: synced, pending, or errored.
 type LocalRow = ShoppingItem & {
   localId: string; // stable across re-fetches; for new items not yet in sheet
@@ -200,7 +210,7 @@ export default function Shopping() {
           if (row.brand) details.push(['Brand', row.brand]);
           if (row.location) details.push(['Where', <><span>📍 </span>{row.location}</>]);
           if (row.count) details.push(['Count', `×${row.count}`]);
-          if (row.price) details.push(['Price', row.price]);
+          if (row.price) details.push(['Price', formatPrice(row.price)]);
           if (row.notes) details.push(['Notes', row.notes]);
           return (
             <div
