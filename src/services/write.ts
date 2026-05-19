@@ -15,8 +15,13 @@ interface UpdatePayload {
   rowIndex: number;
   row: (string | number | boolean)[];
 }
+interface DeletePayload {
+  action: 'delete';
+  tab: string;
+  rowIndex: number;
+}
 
-async function call(body: AppendPayload | UpdatePayload): Promise<{ ok?: boolean; rowIndex?: number; error?: string }> {
+async function call(body: AppendPayload | UpdatePayload | DeletePayload): Promise<{ ok?: boolean; rowIndex?: number; error?: string }> {
   if (!URL_) throw new Error('VITE_APPS_SCRIPT_URL not configured');
   const res = await fetch(URL_, {
     method: 'POST',
@@ -35,4 +40,8 @@ export function appendRow(tab: string, row: (string | number | boolean)[]) {
 
 export function updateRow(tab: string, rowIndex: number, row: (string | number | boolean)[]) {
   return call({ action: 'update', tab, rowIndex, row });
+}
+
+export function deleteRow(tab: string, rowIndex: number) {
+  return call({ action: 'delete', tab, rowIndex });
 }

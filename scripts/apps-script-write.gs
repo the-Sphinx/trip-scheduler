@@ -30,6 +30,12 @@ function doPost(e) {
       sheet.getRange(r, 1, 1, body.row.length).setValues([body.row]);
       return json_({ ok: true });
     }
+    if (body.action === 'delete') {
+      const r = body.rowIndex;
+      if (!r || r < 2) return json_({ error: 'invalid rowIndex' });
+      sheet.deleteRow(r);
+      return json_({ ok: true });
+    }
     return json_({ error: 'unknown action' });
   } catch (err) {
     return json_({ error: String(err) });

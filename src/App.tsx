@@ -15,7 +15,7 @@ const navItems = [
   { to: '/transport', label: 'Transport', icon: '✈️' },
   { to: '/attractions', label: 'Sights', icon: '⛩️' },
   { to: '/restaurants', label: 'Food', icon: '🍜' },
-  { to: '/shopping', label: 'Shop', icon: '🛍️' },
+  { to: '/shopping', label: 'Shopping', icon: '🛍️' },
 ];
 
 function App() {
