@@ -88,6 +88,18 @@ export interface Restaurant {
   photo_url: string;
 }
 
+export interface ShoppingItem {
+  rowIndex: number; // 1-based incl header; first data row = 2
+  hasBought: boolean;
+  item: string;
+  brand: string;
+  location: string;
+  count: string;
+  price: string;
+  to: string;
+  notes: string;
+}
+
 export interface TripData {
   overview: CityStop[];
   schedule: ScheduleItem[];
@@ -95,6 +107,7 @@ export interface TripData {
   transport: Transport[];
   attractions: Attraction[];
   restaurants: Restaurant[];
+  shopping: ShoppingItem[];
 }
 
 export interface DaySchedule {

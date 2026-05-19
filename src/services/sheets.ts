@@ -1,4 +1,4 @@
-import type { TripData, CityStop, ScheduleItem, Hotel, Transport, Attraction, Restaurant } from '../types';
+import type { TripData, CityStop, ScheduleItem, Hotel, Transport, Attraction, Restaurant, ShoppingItem } from '../types';
 import { setCache, getCache, getCacheStale } from './cache';
 
 const SHEETS_CACHE_KEY = 'sheets-data';
@@ -118,6 +118,27 @@ function parseAttraction(row: string[], headers: string[]): Attraction {
   };
 }
 
+function truthy(v: string): boolean {
+  const s = (v || '').trim().toLowerCase();
+  return s === 'true' || s === 'yes' || s === 'y' || s === '1' || s === 'x' || s === '✓';
+}
+
+function parseShopping(rows: string[][]): ShoppingItem[] {
+  if (rows.length < 2) return [];
+  const headers = rows[0].map((h) => h.trim().toLowerCase().replace(/\s+/g, '_'));
+  return rows.slice(1).map((row, i) => ({
+    rowIndex: i + 2,
+    hasBought: truthy(col(row, headers, 'hasbought')),
+    item: col(row, headers, 'item'),
+    brand: col(row, headers, 'brand'),
+    location: col(row, headers, 'location'),
+    count: col(row, headers, 'count'),
+    price: col(row, headers, 'price'),
+    to: col(row, headers, 'to'),
+    notes: col(row, headers, 'notes'),
+  }));
+}
+
 function parseRestaurant(row: string[], headers: string[]): Restaurant {
   return {
     name: col(row, headers, 'name'),
@@ -146,7 +167,7 @@ export async function fetchTripData(force = false): Promise<TripData> {
   }
 
   try {
-    const [overviewRows, scheduleRows, hotelRows, transportRows, attractionRows, restaurantRows] =
+    const [overviewRows, scheduleRows, hotelRows, transportRows, attractionRows, restaurantRows, shoppingRows] =
       await Promise.all([
         fetchSheet('Overview'),
         fetchSheet('Schedule'),
@@ -154,6 +175,7 @@ export async function fetchTripData(force = false): Promise<TripData> {
         fetchSheet('Transport'),
         fetchSheet('Attractions'),
         fetchSheet('Restaurants'),
+        fetchSheet('Shopping').catch(() => [] as string[][]),
       ]);
 
     const data: TripData = {
@@ -163,6 +185,7 @@ export async function fetchTripData(force = false): Promise<TripData> {
       transport: parseRows(transportRows, parseTransport),
       attractions: parseRows(attractionRows, parseAttraction),
       restaurants: parseRows(restaurantRows, parseRestaurant),
+      shopping: parseShopping(shoppingRows),
     };
 
     setCache(SHEETS_CACHE_KEY, data, CACHE_TTL);

@@ -6,6 +6,7 @@ import Hotels from './pages/Hotels';
 import TransportPage from './pages/Transport';
 import Attractions from './pages/Attractions';
 import Restaurants from './pages/Restaurants';
+import Shopping from './pages/Shopping';
 
 const navItems = [
   { to: '/', label: 'Overview', icon: '🗺️' },
@@ -14,6 +15,7 @@ const navItems = [
   { to: '/transport', label: 'Transport', icon: '✈️' },
   { to: '/attractions', label: 'Sights', icon: '⛩️' },
   { to: '/restaurants', label: 'Food', icon: '🍜' },
+  { to: '/shopping', label: 'Shop', icon: '🛍️' },
 ];
 
 function App() {
@@ -86,6 +88,7 @@ function App() {
           <Route path="/transport" element={<TransportPage />} />
           <Route path="/attractions" element={<Attractions />} />
           <Route path="/restaurants" element={<Restaurants />} />
+          <Route path="/shopping" element={<Shopping />} />
         </Routes>
       </main>
     </div>
