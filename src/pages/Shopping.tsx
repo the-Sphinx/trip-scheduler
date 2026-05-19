@@ -196,84 +196,76 @@ export default function Shopping() {
       <div className="space-y-2">
         {sorted.map((row) => {
           const colorClass = personColors[row.to.trim()] || defaultPersonColor;
+          const details: Array<[string, React.ReactNode]> = [];
+          if (row.brand) details.push(['Brand', row.brand]);
+          if (row.location) details.push(['Where', <><span>📍 </span>{row.location}</>]);
+          if (row.count) details.push(['Count', `×${row.count}`]);
+          if (row.price) details.push(['Price', row.price]);
+          if (row.notes) details.push(['Notes', row.notes]);
           return (
             <div
               key={row.localId}
-              className={`group bg-surface rounded-xl p-3 flex items-center gap-3 transition-all border ${
+              className={`group bg-surface rounded-xl p-3 transition-all border ${
                 row.error ? 'border-red-500/40' : 'border-transparent'
               } ${row.hasBought ? 'opacity-60' : ''}`}
             >
-              {/* Custom checkbox */}
-              <button
-                onClick={() => toggleBought(row)}
-                aria-label={row.hasBought ? 'Mark not bought' : 'Mark bought'}
-                className={`w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center transition-all ${
-                  row.hasBought
-                    ? 'bg-gradient-to-br from-emerald-500 to-teal-400 text-white'
-                    : 'bg-surface-light border-2 border-text-muted/30 hover:border-primary-light'
-                }`}
-              >
-                {row.hasBought && <span className="text-xs">✓</span>}
-              </button>
-
-              {/* Content */}
-              <button
-                onClick={() => openEdit(row)}
-                className="flex-1 min-w-0 text-left"
-              >
-                <div className="flex items-center gap-2">
-                  <p className={`font-medium truncate ${row.hasBought ? 'line-through text-text-muted' : ''}`}>
-                    {row.item || <span className="text-text-muted italic">(no name)</span>}
-                  </p>
-                  {row.pending && <span className="text-[10px] text-text-muted animate-pulse">syncing…</span>}
-                  {row.error && <span className="text-[10px] text-red-300" title={row.error}>⚠ retry?</span>}
-                </div>
-                <div className="flex flex-wrap gap-1 mt-1">
-                  {row.to && (
-                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full border ${colorClass}`}>
-                      {row.to}
-                    </span>
-                  )}
-                  {row.brand && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-surface-light text-text-muted">
-                      {row.brand}
-                    </span>
-                  )}
-                  {row.location && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-surface-light text-text-muted">
-                      📍 {row.location}
-                    </span>
-                  )}
-                  {row.count && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-surface-light text-text-muted">
-                      ×{row.count}
-                    </span>
-                  )}
-                  {row.price && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-surface-light text-text-muted">
-                      {row.price}
-                    </span>
-                  )}
-                </div>
-              </button>
-
-              {/* Actions */}
-              <div className="flex items-center gap-1 flex-shrink-0">
+              {/* Top row: checkbox + title + person + actions */}
+              <div className="flex items-center gap-3">
                 <button
-                  onClick={() => openEdit(row)}
-                  className="w-8 h-8 rounded-full hover:bg-surface-light flex items-center justify-center text-text-muted"
-                  aria-label="Edit"
+                  onClick={() => toggleBought(row)}
+                  aria-label={row.hasBought ? 'Mark not bought' : 'Mark bought'}
+                  className={`w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center transition-all ${
+                    row.hasBought
+                      ? 'bg-gradient-to-br from-emerald-500 to-teal-400 text-white'
+                      : 'bg-surface-light border-2 border-text-muted/30 hover:border-primary-light'
+                  }`}
                 >
-                  ✏️
+                  {row.hasBought && <span className="text-xs">✓</span>}
                 </button>
-                <button
-                  onClick={() => setConfirmDelete(row)}
-                  className="w-8 h-8 rounded-full hover:bg-red-500/20 flex items-center justify-center text-text-muted hover:text-red-300"
-                  aria-label="Delete"
-                >
-                  🗑️
+
+                <button onClick={() => openEdit(row)} className="flex-1 min-w-0 text-left">
+                  <div className="flex items-center gap-2">
+                    <h3 className={`font-semibold text-base truncate ${row.hasBought ? 'line-through text-text-muted' : ''}`}>
+                      {row.item || <span className="text-text-muted italic">(no name)</span>}
+                    </h3>
+                    {row.pending && <span className="text-[10px] text-text-muted animate-pulse">syncing…</span>}
+                    {row.error && <span className="text-[10px] text-red-300" title={row.error}>⚠</span>}
+                  </div>
                 </button>
+
+                {row.to && (
+                  <span className={`text-xs px-2 py-0.5 rounded-full border ${colorClass} flex-shrink-0`}>
+                    for {row.to}
+                  </span>
+                )}
+
+                <div className="flex items-center gap-0.5 flex-shrink-0">
+                  <button
+                    onClick={() => openEdit(row)}
+                    className="w-8 h-8 rounded-full hover:bg-surface-light flex items-center justify-center text-text-muted"
+                    aria-label="Edit"
+                  >✏️</button>
+                  <button
+                    onClick={() => setConfirmDelete(row)}
+                    className="w-8 h-8 rounded-full hover:bg-red-500/20 flex items-center justify-center text-text-muted hover:text-red-300"
+                    aria-label="Delete"
+                  >🗑️</button>
+                </div>
               </div>
+
+              {/* Details grid */}
+              {details.length > 0 && (
+                <dl className="mt-2 ml-10 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 text-sm">
+                  {details.map(([label, value]) => (
+                    <div key={label} className="flex gap-2">
+                      <dt className="text-[10px] uppercase tracking-wider text-text-muted/70 w-14 flex-shrink-0 pt-0.5">
+                        {label}
+                      </dt>
+                      <dd className="text-text flex-1 min-w-0 break-words">{value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              )}
             </div>
           );
         })}
