@@ -74,7 +74,9 @@ export function TripDataProvider({ children }: { children: ReactNode }) {
   const [days, setDays] = useState<DaySchedule[]>([]);
 
   const load = async (force = false) => {
-    setLoading(true);
+    // Only flip the loading flag when we have nothing to show. Background
+    // refreshes (e.g. after a write) shouldn't blank the page.
+    if (!data) setLoading(true);
     setError(null);
     try {
       const tripData = await fetchTripData(force);
