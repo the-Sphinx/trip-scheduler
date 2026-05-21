@@ -1,19 +1,28 @@
 import { useEffect, useState } from 'react';
 import { fetchWeather, type WeatherData } from '../services/weather';
 import type { DaySchedule } from '../types';
+import { useTripData } from '../context/TripDataContext';
+import { resolveScheduleItem } from '../services/resolve';
 
 export default function WeatherWidget({ day }: { day: DaySchedule }) {
   const [weather, setWeather] = useState<WeatherData | null>(null);
+  const { data } = useTripData();
 
   useEffect(() => {
-    // Use first activity's location or a default for the city
-    const loc = day.items.find((i) => i.lat && i.lng);
-    const lat = loc?.lat || day.hotel?.lat || 0;
-    const lng = loc?.lng || day.hotel?.lng || 0;
+    // Pick coords from the first schedule item that resolves to coords; fall back to the day's hotel.
+    let lat = 0, lng = 0;
+    for (const item of day.items) {
+      const r = resolveScheduleItem(item, data);
+      if (r.lat && r.lng) { lat = r.lat; lng = r.lng; break; }
+    }
+    if (!lat || !lng) {
+      lat = day.hotel?.lat || 0;
+      lng = day.hotel?.lng || 0;
+    }
     if (!lat || !lng) return;
 
     fetchWeather(lat, lng, day.date).then(setWeather);
-  }, [day]);
+  }, [day, data]);
 
   if (!weather) return null;
 
