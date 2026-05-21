@@ -7,6 +7,7 @@ export interface ResolvedScheduleItem {
   lng: number;
   photo_url: string;
   website: string;
+  notes: string;
 }
 
 const EMPTY: ResolvedScheduleItem = {
@@ -16,6 +17,7 @@ const EMPTY: ResolvedScheduleItem = {
   lng: 0,
   photo_url: '',
   website: '',
+  notes: '',
 };
 
 /**
@@ -29,15 +31,15 @@ export function resolveScheduleItem(item: ScheduleItem, data: TripData | null): 
 
   if (item.ref_type === 'attraction') {
     const a = data.attractions.find((x) => matchName(x.name));
-    if (a) return { location_name: a.name, address: a.address, lat: a.lat, lng: a.lng, photo_url: a.photo_url, website: a.website };
+    if (a) return { location_name: a.name, address: a.address, lat: a.lat, lng: a.lng, photo_url: a.photo_url, website: a.website, notes: a.notes };
   }
   if (item.ref_type === 'hotel') {
     const h = data.hotels.find((x) => matchName(x.name));
-    if (h) return { location_name: h.name, address: h.address, lat: h.lat, lng: h.lng, photo_url: h.photo_url, website: h.website };
+    if (h) return { location_name: h.name, address: h.address, lat: h.lat, lng: h.lng, photo_url: h.photo_url, website: h.website, notes: h.notes };
   }
   if (item.ref_type === 'restaurant') {
     const r = data.restaurants.find((x) => matchName(x.name));
-    if (r) return { location_name: r.name, address: r.address, lat: r.lat, lng: r.lng, photo_url: r.photo_url, website: r.website };
+    if (r) return { location_name: r.name, address: r.address, lat: r.lat, lng: r.lng, photo_url: r.photo_url, website: r.website, notes: r.notes };
   }
   return EMPTY;
 }

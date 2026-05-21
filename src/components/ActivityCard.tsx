@@ -33,10 +33,10 @@ export default function ActivityCard({ item }: { item: ScheduleItem }) {
 
   return (
     <div
-      className={`bg-surface rounded-lg p-3 cursor-pointer transition-all hover:bg-surface-light relative ${thumb ? 'min-h-[6.5rem]' : ''}`}
+      className={`bg-surface rounded-lg p-3 cursor-pointer transition-all hover:bg-surface-light relative ${thumb && !expanded ? 'min-h-[6.5rem]' : ''}`}
       onClick={() => setExpanded(!expanded)}
     >
-      <div className="flex items-start gap-3 pr-32">
+      <div className={`flex items-start gap-3 ${thumb && !expanded ? 'pr-32' : ''}`}>
         {/* Time */}
         <div className="text-xs text-text-muted w-12 flex-shrink-0 pt-0.5">
           <p className="font-medium">{item.time_start}</p>
@@ -57,15 +57,22 @@ export default function ActivityCard({ item }: { item: ScheduleItem }) {
               {item.category}
             </span>
           </div>
-          {!expanded && item.notes && (
-            <p className="text-primary-light/80 text-xs mt-1 line-clamp-2 italic">{item.notes}</p>
+          {!expanded && (item.notes || resolved.notes) && (
+            <div className="mt-1 space-y-0.5">
+              {item.notes && (
+                <p className="text-primary-light/80 text-xs line-clamp-2 italic">{item.notes}</p>
+              )}
+              {resolved.notes && (
+                <p className="text-primary-light/80 text-xs line-clamp-2 italic">{resolved.notes}</p>
+              )}
+            </div>
           )}
         </div>
 
       </div>
 
-      {/* Thumbnail (absolute, doesn't stretch the row) */}
-      {thumb && (
+      {/* Thumbnail (absolute, doesn't stretch the row) — hidden when expanded */}
+      {thumb && !expanded && (
         <img
           src={thumb}
           alt={item.activity}
@@ -91,7 +98,12 @@ export default function ActivityCard({ item }: { item: ScheduleItem }) {
               🌐 Website
             </a>
           )}
-          {item.notes && <p>{item.notes}</p>}
+          {item.notes && (
+            <p className="text-primary-light/80 italic">{item.notes}</p>
+          )}
+          {resolved.notes && (
+            <p className="text-primary-light/80 italic">{resolved.notes}</p>
+          )}
           {thumb && (
             <img
               src={thumb}
