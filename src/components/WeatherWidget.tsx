@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { fetchWeather, type WeatherData } from '../services/weather';
+import { fetchWeather, describeWeather, type WeatherData } from '../services/weather';
 import type { DaySchedule } from '../types';
 import { useTripData } from '../context/TripDataContext';
 import { resolveScheduleItem } from '../services/resolve';
@@ -25,17 +25,19 @@ export default function WeatherWidget({ day }: { day: DaySchedule }) {
   }, [day, data]);
 
   if (!weather) return null;
+  const { emoji, label } = describeWeather(weather.weather_code);
+  const typical = weather.source === 'climatology';
 
   return (
-    <div className="flex items-center gap-1.5 text-xs text-text-muted">
-      <img
-        src={`https://openweathermap.org/img/wn/${weather.icon}.png`}
-        alt={weather.description}
-        className="w-8 h-8"
-      />
+    <div className="flex items-center gap-1.5 text-xs text-text-muted" title={`${label}${typical ? ' (typical for this date — based on last year)' : ''}`}>
+      <span className="text-lg leading-none">{emoji}</span>
       <span>
         {weather.temp_min}°–{weather.temp_max}°C
       </span>
+      {weather.precipitation_mm > 0 && (
+        <span className="text-blue-400">💧{weather.precipitation_mm}mm</span>
+      )}
+      {typical && <span className="text-[10px] opacity-70">~typical</span>}
     </div>
   );
 }

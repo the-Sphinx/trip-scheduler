@@ -17,7 +17,8 @@
       "Bash(gh run *)",
       "Bash(npm install *)",
       "Bash(npx -y staticrypt dist/index.html -p \"AdaDeniz\" --short --remember 30 -d dist-encrypted)",
-      "Bash(gh secret *)"
+      "Bash(gh secret *)",
+      "Bash(npx tsc *)"
     ]
   }
 }
