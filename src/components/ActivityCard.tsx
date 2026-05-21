@@ -57,13 +57,33 @@ export default function ActivityCard({ item }: { item: ScheduleItem }) {
               {item.category}
             </span>
           </div>
-          {!expanded && (item.notes || resolved.notes) && (
+          {(item.notes || resolved.notes) && (
             <div className="mt-1 space-y-0.5">
               {item.notes && (
-                <p className="text-primary-light/80 text-xs line-clamp-2 italic">{item.notes}</p>
+                <p className={`text-primary-light/80 text-xs italic ${expanded ? '' : 'line-clamp-2'}`}>{item.notes}</p>
               )}
               {resolved.notes && (
-                <p className="text-primary-light/80 text-xs line-clamp-2 italic">{resolved.notes}</p>
+                <p className={`text-primary-light/80 text-xs italic ${expanded ? '' : 'line-clamp-2'}`}>{resolved.notes}</p>
+              )}
+            </div>
+          )}
+
+          {/* Extra info appears below the notes when expanded — same text-xs as notes */}
+          {expanded && (resolved.address || resolved.website) && (
+            <div className="mt-2 space-y-0.5">
+              {resolved.address && (
+                <p className="text-text-muted text-xs">🗺️ {resolved.address}</p>
+              )}
+              {resolved.website && (
+                <a
+                  href={resolved.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary-light text-xs hover:underline inline-block"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  🌐 Website
+                </a>
               )}
             </div>
           )}
@@ -81,38 +101,14 @@ export default function ActivityCard({ item }: { item: ScheduleItem }) {
         />
       )}
 
-      {/* Expanded details */}
-      {expanded && (
-        <div className="mt-3 ml-15 space-y-2 text-sm border-t border-surface-light pt-3">
-          {resolved.address && (
-            <p className="text-text-muted">🗺️ {resolved.address}</p>
-          )}
-          {resolved.website && (
-            <a
-              href={resolved.website}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary-light text-xs hover:underline inline-block"
-              onClick={(e) => e.stopPropagation()}
-            >
-              🌐 Website
-            </a>
-          )}
-          {item.notes && (
-            <p className="text-primary-light/80 italic">{item.notes}</p>
-          )}
-          {resolved.notes && (
-            <p className="text-primary-light/80 italic">{resolved.notes}</p>
-          )}
-          {thumb && (
-            <img
-              src={thumb}
-              alt={item.activity}
-              className="rounded-lg w-full max-h-48 object-cover mt-2"
-              loading="lazy"
-            />
-          )}
-        </div>
+      {/* Full-width image at the bottom when expanded */}
+      {expanded && thumb && (
+        <img
+          src={thumb}
+          alt={item.activity}
+          className="rounded-lg w-full max-h-48 object-cover mt-3"
+          loading="lazy"
+        />
       )}
     </div>
   );
