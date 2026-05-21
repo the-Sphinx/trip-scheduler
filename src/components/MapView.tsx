@@ -1,6 +1,8 @@
 import { GoogleMap, Marker, Polyline, InfoWindow, useJsApiLoader } from '@react-google-maps/api';
 import { useMemo, useState } from 'react';
 import type { ScheduleItem, Hotel } from '../types';
+import { useTripData } from '../context/TripDataContext';
+import { resolveScheduleItem } from '../services/resolve';
 
 const mapContainerStyle = {
   width: '100%',
@@ -25,12 +27,13 @@ interface Props {
 export default function MapView({ items, startHotel, endHotel }: Props) {
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string;
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
+  const { data } = useTripData();
 
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: apiKey || '',
   });
 
-  // Build ordered point list: [startHotel, ...items, endHotel]
+  // Build ordered point list: [startHotel, ...resolved items, endHotel]
   const points = useMemo(() => {
     const pts: Array<{ lat: number; lng: number; label: string; title: string; kind: 'hotel' | 'item' }> = [];
     if (startHotel && startHotel.lat && startHotel.lng) {
@@ -38,8 +41,9 @@ export default function MapView({ items, startHotel, endHotel }: Props) {
     }
     let n = 1;
     for (const item of items) {
-      if (item.lat && item.lng) {
-        pts.push({ lat: item.lat, lng: item.lng, label: String(n++), title: item.activity, kind: 'item' });
+      const r = resolveScheduleItem(item, data);
+      if (r.lat && r.lng) {
+        pts.push({ lat: r.lat, lng: r.lng, label: String(n++), title: item.activity, kind: 'item' });
       }
     }
     // Avoid duplicating end hotel if same as last item (or same as start)
@@ -51,7 +55,7 @@ export default function MapView({ items, startHotel, endHotel }: Props) {
       }
     }
     return pts;
-  }, [items, startHotel, endHotel]);
+  }, [items, startHotel, endHotel, data]);
 
   const center = useMemo(() => {
     if (points.length === 0) return { lat: 35.6762, lng: 139.6503 };

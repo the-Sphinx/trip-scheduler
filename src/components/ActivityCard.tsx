@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { ScheduleItem } from '../types';
 import { useTripData } from '../context/TripDataContext';
+import { resolveScheduleItem } from '../services/resolve';
 
 const categoryColors: Record<string, string> = {
   sightseeing: 'bg-blue-500/20 text-blue-400',
@@ -22,24 +23,13 @@ const categoryIcons: Record<string, string> = {
   other: '📌',
 };
 
-function findThumbnail(item: ScheduleItem, data: ReturnType<typeof useTripData>['data']): string {
-  if (item.photo_url) return item.photo_url;
-  if (!data) return '';
-  const hay = `${item.activity} ${item.location_name}`.toLowerCase();
-  const match = (name: string) => name && hay.includes(name.toLowerCase());
-  const a = data.attractions.find((x) => match(x.name));
-  if (a?.photo_url) return a.photo_url;
-  const h = data.hotels.find((x) => match(x.name));
-  if (h?.photo_url) return h.photo_url;
-  return '';
-}
-
 export default function ActivityCard({ item }: { item: ScheduleItem }) {
   const [expanded, setExpanded] = useState(false);
   const { data } = useTripData();
   const colorClass = categoryColors[item.category] || categoryColors.other;
   const icon = categoryIcons[item.category] || categoryIcons.other;
-  const thumb = findThumbnail(item, data);
+  const resolved = resolveScheduleItem(item, data);
+  const thumb = resolved.photo_url;
 
   return (
     <div
@@ -60,8 +50,8 @@ export default function ActivityCard({ item }: { item: ScheduleItem }) {
             <h4 className="font-medium text-sm truncate">{item.activity}</h4>
           </div>
           <div className="flex items-center gap-2 mt-0.5">
-            {item.location_name && (
-              <p className="text-text-muted text-xs truncate">📍 {item.location_name}</p>
+            {resolved.location_name && (
+              <p className="text-text-muted text-xs truncate">📍 {resolved.location_name}</p>
             )}
             <span className={`inline-block text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0 ${colorClass}`}>
               {item.category}
@@ -87,8 +77,19 @@ export default function ActivityCard({ item }: { item: ScheduleItem }) {
       {/* Expanded details */}
       {expanded && (
         <div className="mt-3 ml-15 space-y-2 text-sm border-t border-surface-light pt-3">
-          {item.address && (
-            <p className="text-text-muted">🗺️ {item.address}</p>
+          {resolved.address && (
+            <p className="text-text-muted">🗺️ {resolved.address}</p>
+          )}
+          {resolved.website && (
+            <a
+              href={resolved.website}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary-light text-xs hover:underline inline-block"
+              onClick={(e) => e.stopPropagation()}
+            >
+              🌐 Website
+            </a>
           )}
           {item.notes && <p>{item.notes}</p>}
           {item.links && (
@@ -107,9 +108,9 @@ export default function ActivityCard({ item }: { item: ScheduleItem }) {
               ))}
             </div>
           )}
-          {item.photo_url && (
+          {thumb && (
             <img
-              src={item.photo_url}
+              src={thumb}
               alt={item.activity}
               className="rounded-lg w-full max-h-48 object-cover mt-2"
               loading="lazy"

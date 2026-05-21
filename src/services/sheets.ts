@@ -60,6 +60,8 @@ function parseSchedule(row: string[], headers: string[]): ScheduleItem {
     notes: col(row, headers, 'notes'),
     links: col(row, headers, 'links'),
     photo_url: col(row, headers, 'photo_url'),
+    ref_type: (col(row, headers, 'ref_type') || '') as ScheduleItem['ref_type'],
+    ref_key: col(row, headers, 'ref_key'),
   };
 }
 

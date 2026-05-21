@@ -6,6 +6,8 @@ export interface CityStop {
   transport_type: 'flight' | 'train' | 'bus' | 'ferry' | '';
 }
 
+export type ScheduleRefType = '' | 'attraction' | 'hotel' | 'restaurant' | 'transport';
+
 export interface ScheduleItem {
   date: string;
   time_start: string;
@@ -13,12 +15,17 @@ export interface ScheduleItem {
   activity: string;
   category: 'sightseeing' | 'food' | 'transport' | 'shopping' | 'rest' | 'entertainment' | 'other';
   location_name: string;
+  // Fallback fields — used when ref_type/ref_key are empty (free items).
   address: string;
   lat: number;
   lng: number;
   notes: string;
   links: string;
   photo_url: string;
+  // Reference to an entity in another tab. When set, the entity is the source
+  // of truth for address / lat / lng / photo / website.
+  ref_type: ScheduleRefType;
+  ref_key: string;
 }
 
 export interface Hotel {

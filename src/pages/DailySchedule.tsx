@@ -3,13 +3,14 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import type { Swiper as SwiperType } from 'swiper';
 import 'swiper/css';
 import { useTripData } from '../context/TripDataContext';
+import { resolveScheduleItem } from '../services/resolve';
 import ActivityCard from '../components/ActivityCard';
 import MapView from '../components/MapView';
 import WeatherWidget from '../components/WeatherWidget';
 import HotelCard from '../components/HotelCard';
 
 export default function DailySchedule() {
-  const { days } = useTripData();
+  const { days, data } = useTripData();
   const [activeDay, setActiveDay] = useState(0);
   const swiperRef = useRef<SwiperType | null>(null);
   const tabsRef = useRef<HTMLDivElement>(null);
@@ -91,7 +92,10 @@ export default function DailySchedule() {
               </div>
 
               {/* Map */}
-              {(day.items.some((item) => item.lat && item.lng) || day.hotel || days[dayIdx - 1]?.hotel) && (
+              {(day.items.some((item) => {
+                const r = resolveScheduleItem(item, data);
+                return r.lat && r.lng;
+              }) || day.hotel || days[dayIdx - 1]?.hotel) && (
                 <MapView
                   items={day.items}
                   startHotel={days[dayIdx - 1]?.hotel}
