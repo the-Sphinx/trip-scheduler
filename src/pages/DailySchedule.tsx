@@ -47,7 +47,7 @@ export default function DailySchedule() {
     <div className="flex flex-col h-[calc(100vh-4rem)]">
       {/* Day tabs */}
       <div className="bg-surface border-b border-surface-light sticky top-0 z-10">
-        <div ref={tabsRef} className="flex overflow-x-auto gap-1 p-2 scrollbar-hide">
+        <div ref={tabsRef} className="flex justify-center overflow-x-auto gap-1 p-2 scrollbar-hide">
           {days.map((day, i) => (
             <button
               key={day.date}
