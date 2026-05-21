@@ -14,16 +14,9 @@ export interface ScheduleItem {
   time_end: string;
   activity: string;
   category: 'sightseeing' | 'food' | 'transport' | 'shopping' | 'rest' | 'entertainment' | 'other';
-  location_name: string;
-  // Fallback fields — used when ref_type/ref_key are empty (free items).
-  address: string;
-  lat: number;
-  lng: number;
   notes: string;
-  links: string;
-  photo_url: string;
-  // Reference to an entity in another tab. When set, the entity is the source
-  // of truth for address / lat / lng / photo / website.
+  // Reference to an entity in another tab. When set, the entity supplies
+  // address / lat / lng / photo / website. Free items leave both empty.
   ref_type: ScheduleRefType;
   ref_key: string;
 }

@@ -53,13 +53,7 @@ function parseSchedule(row: string[], headers: string[]): ScheduleItem {
     time_end: col(row, headers, 'time_end'),
     activity: col(row, headers, 'activity'),
     category: (col(row, headers, 'category') || 'other') as ScheduleItem['category'],
-    location_name: col(row, headers, 'location_name'),
-    address: col(row, headers, 'address'),
-    lat: num(col(row, headers, 'lat')),
-    lng: num(col(row, headers, 'lng')),
     notes: col(row, headers, 'notes'),
-    links: col(row, headers, 'links'),
-    photo_url: col(row, headers, 'photo_url'),
     ref_type: (col(row, headers, 'ref_type') || '') as ScheduleItem['ref_type'],
     ref_key: col(row, headers, 'ref_key'),
   };

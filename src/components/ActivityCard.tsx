@@ -92,22 +92,6 @@ export default function ActivityCard({ item }: { item: ScheduleItem }) {
             </a>
           )}
           {item.notes && <p>{item.notes}</p>}
-          {item.links && (
-            <div className="flex flex-wrap gap-2">
-              {item.links.split(',').map((link, i) => (
-                <a
-                  key={i}
-                  href={link.trim()}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary-light text-xs hover:underline"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  🔗 Link {i + 1}
-                </a>
-              ))}
-            </div>
-          )}
           {thumb && (
             <img
               src={thumb}
