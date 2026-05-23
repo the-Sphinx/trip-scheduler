@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTripData } from '../context/TripDataContext';
 import type { Attraction } from '../types';
 import { hasGuide } from '../content/attractions';
@@ -92,11 +92,18 @@ export default function Attractions() {
 
 function AttractionCard({ attraction }: { attraction: Attraction }) {
   const [expanded, setExpanded] = useState(false);
+  const navigate = useNavigate();
+  const guideAvailable = attraction.slug && hasGuide(attraction.slug);
+
+  const onCardClick = () => {
+    if (guideAvailable) navigate(`/attractions/${attraction.slug}`);
+    else setExpanded((v) => !v);
+  };
 
   return (
     <div
       className="bg-surface rounded-lg overflow-hidden cursor-pointer"
-      onClick={() => setExpanded(!expanded)}
+      onClick={onCardClick}
     >
       {/* Photo */}
       {attraction.photo_url && (

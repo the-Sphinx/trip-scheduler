@@ -1,9 +1,19 @@
-// Schema for an attraction guide page. Keep it structured (not free-form
-// markdown) so every guide renders with a consistent mobile-friendly layout.
+// Schema for an attraction guide page. Each text field is provided in both
+// English and Turkish; the page picks the active language. Within any text
+// field, **double asterisks** mark emphasized terms (rendered bold + colored).
+
+export type Lang = 'en' | 'tr';
 
 export interface GuideSection {
   title: string;
-  body: string; // 1-3 short paragraphs, plain text
+  body: string;
+}
+
+export interface GuideLocale {
+  intro: string;
+  highlights: string[];
+  sections?: GuideSection[];
+  tips?: string[];
 }
 
 export interface GuideSource {
@@ -13,16 +23,10 @@ export interface GuideSource {
 
 export interface AttractionGuide {
   slug: string;
-  // 1-paragraph hook shown at the top
-  intro: string;
-  // Quick bullets — what makes this place worth visiting
-  highlights: string[];
-  // Optional structured body sections (history, what to see, etc.)
-  sections?: GuideSection[];
-  // Practical, in-the-moment tips
-  tips?: string[];
-  // High-res image URLs (1000-1600px ideal). First image is the hero.
-  gallery: string[];
-  // Where information was sourced for credibility & follow-up reading
+  // Shared across languages
+  gallery: string[]; // high-res URLs, first is the hero
   sources?: GuideSource[];
+  // Per-language content
+  en: GuideLocale;
+  tr: GuideLocale;
 }
