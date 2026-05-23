@@ -7,6 +7,7 @@ import TransportPage from './pages/Transport';
 import Attractions from './pages/Attractions';
 import Restaurants from './pages/Restaurants';
 import Shopping from './pages/Shopping';
+import AttractionGuidePage from './pages/AttractionGuidePage';
 
 const navItems = [
   { to: '/', label: 'Overview', icon: '🗺️' },
@@ -87,6 +88,7 @@ function App() {
           <Route path="/hotels" element={<Hotels />} />
           <Route path="/transport" element={<TransportPage />} />
           <Route path="/attractions" element={<Attractions />} />
+          <Route path="/attractions/:slug" element={<AttractionGuidePage />} />
           <Route path="/restaurants" element={<Restaurants />} />
           <Route path="/shopping" element={<Shopping />} />
         </Routes>

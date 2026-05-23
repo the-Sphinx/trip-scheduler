@@ -111,6 +111,7 @@ function parseAttraction(row: string[], headers: string[]): Attraction {
     lat: num(col(row, headers, 'lat')),
     lng: num(col(row, headers, 'lng')),
     photo_url: col(row, headers, 'photo_url'),
+    slug: col(row, headers, 'slug'),
   };
 }
 

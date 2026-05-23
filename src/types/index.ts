@@ -68,6 +68,7 @@ export interface Attraction {
   lat: number;
   lng: number;
   photo_url: string;
+  slug: string;
 }
 
 export interface Restaurant {

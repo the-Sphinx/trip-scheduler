@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useTripData } from '../context/TripDataContext';
 import type { Attraction } from '../types';
+import { hasGuide } from '../content/attractions';
 
 export default function Attractions() {
   const { data } = useTripData();
@@ -131,17 +133,28 @@ function AttractionCard({ attraction }: { attraction: Attraction }) {
               <p className="text-text-muted">🕐 {attraction.hours}</p>
             )}
             {attraction.notes && <p>{attraction.notes}</p>}
-            {attraction.website && (
-              <a
-                href={attraction.website}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary-light hover:underline inline-block"
-                onClick={(e) => e.stopPropagation()}
-              >
-                Visit website →
-              </a>
-            )}
+            <div className="flex flex-wrap gap-2 pt-1">
+              {attraction.slug && hasGuide(attraction.slug) && (
+                <Link
+                  to={`/attractions/${attraction.slug}`}
+                  className="text-xs px-3 py-1.5 rounded-full bg-primary-light/20 text-primary-light hover:bg-primary-light/30"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  📖 Open guide
+                </Link>
+              )}
+              {attraction.website && (
+                <a
+                  href={attraction.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs px-3 py-1.5 rounded-full bg-surface-light text-text hover:bg-surface-light/70"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  🌐 Website
+                </a>
+              )}
+            </div>
           </div>
         )}
       </div>
