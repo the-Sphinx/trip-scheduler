@@ -79,7 +79,7 @@ export default function ActivityCard({ item }: { item: ScheduleItem }) {
           )}
 
           {/* Extra info appears below the notes when expanded — same text-xs as notes */}
-          {expanded && (resolved.address || resolved.website || guideSlug) && (
+          {expanded && (resolved.address || resolved.website || resolved.lat || guideSlug) && (
             <div className="mt-2 space-y-1">
               {resolved.address && (
                 <p className="text-text-muted text-xs">🗺️ {resolved.address}</p>
@@ -93,6 +93,17 @@ export default function ActivityCard({ item }: { item: ScheduleItem }) {
                   >
                     📖 Open guide
                   </Link>
+                )}
+                {resolved.lat && resolved.lng && (
+                  <a
+                    href={`https://www.google.com/maps/dir/?api=1&destination=${resolved.lat},${resolved.lng}&travelmode=transit`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs px-2 py-1 rounded-full bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    🧭 Directions
+                  </a>
                 )}
                 {resolved.website && (
                   <a

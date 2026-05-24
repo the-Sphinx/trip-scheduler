@@ -5,6 +5,7 @@ import type { Swiper as SwiperType } from 'swiper';
 import 'swiper/css';
 import { useTripData } from '../context/TripDataContext';
 import { resolveScheduleItem } from '../services/resolve';
+import { estimateLeg } from '../services/distance';
 import ActivityCard from '../components/ActivityCard';
 import MapView from '../components/MapView';
 import WeatherWidget from '../components/WeatherWidget';
@@ -39,14 +40,14 @@ export default function DailySchedule() {
     if (days[i]) navigate(`/schedule/${days[i].date}`, { replace: false });
   };
 
-  // Scroll active tab into view
+  // Scroll active tab into view — scroll only the tabs container, not the page.
   useEffect(() => {
-    if (tabsRef.current) {
-      const activeTab = tabsRef.current.children[activeDay] as HTMLElement;
-      if (activeTab) {
-        activeTab.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-      }
-    }
+    const container = tabsRef.current;
+    if (!container) return;
+    const tab = container.children[activeDay] as HTMLElement | undefined;
+    if (!tab) return;
+    const target = tab.offsetLeft - container.clientWidth / 2 + tab.offsetWidth / 2;
+    container.scrollTo({ left: Math.max(0, target), behavior: 'smooth' });
   }, [activeDay]);
 
   if (days.length === 0) {
@@ -103,7 +104,18 @@ export default function DailySchedule() {
                     day: 'numeric',
                   })}
                 </h2>
-                <WeatherWidget day={day} />
+                <div className="flex items-center gap-2">
+                  <WeatherWidget day={day} />
+                  <button
+                    onClick={() => window.print()}
+                    title="Print this day"
+                    aria-label="Print day"
+                    data-no-print
+                    className="text-text-muted hover:text-text rounded-full p-1.5 hover:bg-surface-light"
+                  >
+                    🖨
+                  </button>
+                </div>
               </div>
 
               {/* Map */}
@@ -119,10 +131,27 @@ export default function DailySchedule() {
               )}
 
               {/* Activity timeline */}
-              <div className="space-y-2">
-                {day.items.map((item, i) => (
-                  <ActivityCard key={i} item={item} />
-                ))}
+              <div className="space-y-1">
+                {day.items.map((item, i) => {
+                  const prev = i > 0 ? day.items[i - 1] : null;
+                  const prevR = prev ? resolveScheduleItem(prev, data) : null;
+                  const r = resolveScheduleItem(item, data);
+                  const leg = prevR ? estimateLeg(prevR, r) : null;
+                  return (
+                    <div key={i} className="space-y-1">
+                      {leg && (
+                        <div className="ml-4 flex items-center gap-1.5 text-[11px] text-text-muted/80 py-0.5">
+                          {leg.mode === 'walk' ? '🚶' : leg.mode === 'transit' ? '🚆' : '🛤'}
+                          <span>
+                            ~{leg.minutes} min {leg.mode === 'walk' ? 'walk' : ''}
+                            {leg.km < 10 ? ` (${leg.km.toFixed(1)} km)` : ''}
+                          </span>
+                        </div>
+                      )}
+                      <ActivityCard item={item} />
+                    </div>
+                  );
+                })}
                 {day.items.length === 0 && (
                   <p className="text-text-muted text-sm text-center py-8">
                     No activities scheduled for this day

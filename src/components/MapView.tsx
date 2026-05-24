@@ -39,11 +39,11 @@ export default function MapView({ items, startHotel, endHotel }: Props) {
     if (startHotel && startHotel.lat && startHotel.lng) {
       pts.push({ lat: startHotel.lat, lng: startHotel.lng, label: '🏨', title: `Start: ${startHotel.name}`, kind: 'hotel' });
     }
-    let n = 1;
     for (const item of items) {
       const r = resolveScheduleItem(item, data);
       if (r.lat && r.lng) {
-        pts.push({ lat: r.lat, lng: r.lng, label: String(n++), title: item.activity, kind: 'item' });
+        const t = (item.time_start || '').padStart(5, '0');
+        pts.push({ lat: r.lat, lng: r.lng, label: t || '•', title: `${item.time_start ? item.time_start + ' · ' : ''}${item.activity}`, kind: 'item' });
       }
     }
     // Avoid duplicating end hotel if same as last item (or same as start)
@@ -109,10 +109,22 @@ export default function MapView({ items, startHotel, endHotel }: Props) {
           <Marker
             key={i}
             position={{ lat: p.lat, lng: p.lng }}
+            icon={
+              p.kind === 'hotel'
+                ? undefined
+                : {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 18,
+                    fillColor: '#2563eb',
+                    fillOpacity: 1,
+                    strokeColor: '#ffffff',
+                    strokeWeight: 2,
+                  }
+            }
             label={
               p.kind === 'hotel'
                 ? { text: p.label, fontSize: '16px' }
-                : { text: p.label, color: '#ffffff', fontSize: '11px', fontWeight: 'bold' }
+                : { text: p.label, color: '#ffffff', fontSize: '10px', fontWeight: 'bold' }
             }
             title={p.title}
             onClick={() => setActiveIdx(i)}

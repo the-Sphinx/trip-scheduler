@@ -20,3 +20,22 @@ body {
 .swiper {
   @apply w-full h-full;
 }
+
+/* Print: show only the active day slide. Black-on-white, no nav, no map. */
+@media print {
+  body { background: #fff !important; color: #000 !important; }
+  nav, .swiper-no-swiping, [aria-label="Refresh"], [data-no-print] { display: none !important; }
+  /* Hide non-active swiper slides */
+  .swiper-slide:not(.swiper-slide-active) { display: none !important; }
+  .swiper, .swiper-wrapper, .swiper-slide-active { height: auto !important; overflow: visible !important; }
+  /* Convert dark surfaces to white-ish for printer */
+  .bg-surface, .bg-surface-light { background: #f4f4f5 !important; color: #000 !important; }
+  .text-text-muted, .text-text-muted\/80 { color: #4b5563 !important; }
+  .text-blue-200 { color: #1d4ed8 !important; font-style: italic; }
+  /* Print-friendly cards: simple border, no rounded shadows */
+  .rounded-lg, .rounded-xl, .rounded-2xl { border-radius: 4px !important; box-shadow: none !important; }
+  /* Page break between sections */
+  h2 { break-after: avoid; }
+  /* Avoid breaking inside cards */
+  .bg-surface { break-inside: avoid; }
+}
