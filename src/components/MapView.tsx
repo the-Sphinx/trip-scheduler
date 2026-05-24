@@ -34,27 +34,41 @@ export default function MapView({ items, startHotel, endHotel }: Props) {
   });
 
   // Build ordered point list: [startHotel, ...resolved items, endHotel]
+  // Build the ordered point list, then merge consecutive (or any) points that
+  // share the same location — multi-stop stations like "08:15 Hankyu" and
+  // "07:45 Walk arrives Kawaramachi" would otherwise stack on top of each other.
   const points = useMemo(() => {
-    const pts: Array<{ lat: number; lng: number; label: string; title: string; kind: 'hotel' | 'item' }> = [];
+    type Pt = { lat: number; lng: number; label: string; titles: string[]; kind: 'hotel' | 'item' };
+    const raw: Pt[] = [];
+    const push = (p: Pt) => {
+      const COORD_EPS = 1e-4; // ~10m
+      const i = raw.findIndex((q) => Math.abs(q.lat - p.lat) < COORD_EPS && Math.abs(q.lng - p.lng) < COORD_EPS);
+      if (i >= 0) {
+        raw[i].titles.push(...p.titles);
+        // Keep the earliest label (already the first), but indicate multiple stops
+        if (raw[i].kind === 'item' && /^\d/.test(raw[i].label)) {
+          const count = raw[i].titles.length;
+          raw[i].label = raw[i].label.replace(/\s*\+\d+$/, '') + (count > 1 ? ` +${count - 1}` : '');
+        }
+        return;
+      }
+      raw.push(p);
+    };
+
     if (startHotel && startHotel.lat && startHotel.lng) {
-      pts.push({ lat: startHotel.lat, lng: startHotel.lng, label: '🏨', title: `Start: ${startHotel.name}`, kind: 'hotel' });
+      push({ lat: startHotel.lat, lng: startHotel.lng, label: '🏨', titles: [`Start: ${startHotel.name}`], kind: 'hotel' });
     }
     for (const item of items) {
       const r = resolveScheduleItem(item, data);
       if (r.lat && r.lng) {
         const t = (item.time_start || '').padStart(5, '0');
-        pts.push({ lat: r.lat, lng: r.lng, label: t || '•', title: `${item.time_start ? item.time_start + ' · ' : ''}${item.activity}`, kind: 'item' });
+        push({ lat: r.lat, lng: r.lng, label: t || '•', titles: [`${item.time_start ? item.time_start + ' · ' : ''}${item.activity}`], kind: 'item' });
       }
     }
-    // Avoid duplicating end hotel if same as last item (or same as start)
     if (endHotel && endHotel.lat && endHotel.lng) {
-      const last = pts[pts.length - 1];
-      const dup = last && Math.abs(last.lat - endHotel.lat) < 1e-5 && Math.abs(last.lng - endHotel.lng) < 1e-5;
-      if (!dup) {
-        pts.push({ lat: endHotel.lat, lng: endHotel.lng, label: '🏨', title: `End: ${endHotel.name}`, kind: 'hotel' });
-      }
+      push({ lat: endHotel.lat, lng: endHotel.lng, label: '🏨', titles: [`End: ${endHotel.name}`], kind: 'hotel' });
     }
-    return pts;
+    return raw;
   }, [items, startHotel, endHotel, data]);
 
   const center = useMemo(() => {
@@ -126,7 +140,7 @@ export default function MapView({ items, startHotel, endHotel }: Props) {
                 ? { text: p.label, fontSize: '16px' }
                 : { text: p.label, color: '#ffffff', fontSize: '10px', fontWeight: 'bold' }
             }
-            title={p.title}
+            title={p.titles.join(' · ')}
             onClick={() => setActiveIdx(i)}
           >
             {activeIdx === i && (
@@ -134,8 +148,10 @@ export default function MapView({ items, startHotel, endHotel }: Props) {
                 onCloseClick={() => setActiveIdx(null)}
                 options={{ headerDisabled: true, pixelOffset: new google.maps.Size(0, -8) }}
               >
-                <div style={{ color: '#111', fontSize: 13, fontWeight: 600, padding: '2px 4px', maxWidth: 220 }}>
-                  {p.title}
+                <div style={{ color: '#111', fontSize: 13, fontWeight: 600, padding: '2px 4px', maxWidth: 240 }}>
+                  {p.titles.map((t, idx) => (
+                    <div key={idx} style={{ marginTop: idx > 0 ? 4 : 0 }}>{t}</div>
+                  ))}
                 </div>
               </InfoWindow>
             )}
