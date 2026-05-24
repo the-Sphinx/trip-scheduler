@@ -10,8 +10,10 @@ export default function Attractions() {
 
   if (!data) return null;
 
-  const cities = [...new Set(data.attractions.map((a) => a.city))].filter(Boolean);
-  const categories = [...new Set(data.attractions.map((a) => a.category))].filter(Boolean);
+  // Stations are entities used for routing/maps, not sights to browse.
+  const browsable = data.attractions.filter((a) => a.category !== 'station');
+  const cities = [...new Set(browsable.map((a) => a.city))].filter(Boolean);
+  const categories = [...new Set(browsable.map((a) => a.category))].filter(Boolean);
 
   // For each attraction, find earliest schedule date+time it appears in.
   // Match if any significant token (≥4 chars) from the attraction's name is in the schedule text.
@@ -35,7 +37,7 @@ export default function Attractions() {
     return best || '￿';
   };
 
-  const sorted = [...data.attractions].sort((a, b) => {
+  const sorted = [...browsable].sort((a, b) => {
     const ka = scheduleKey(a);
     const kb = scheduleKey(b);
     if (ka !== kb) return ka < kb ? -1 : 1;
