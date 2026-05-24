@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import type { Swiper as SwiperType } from 'swiper';
 import 'swiper/css';
@@ -11,19 +12,32 @@ import HotelCard from '../components/HotelCard';
 
 export default function DailySchedule() {
   const { days, data } = useTripData();
+  const { date: dateParam } = useParams();
+  const navigate = useNavigate();
   const [activeDay, setActiveDay] = useState(0);
   const swiperRef = useRef<SwiperType | null>(null);
   const tabsRef = useRef<HTMLDivElement>(null);
 
-  // Determine initial day (today or first day)
+  // Pick initial day from URL param, else today, else first day.
   useEffect(() => {
-    const today = new Date().toISOString().split('T')[0];
-    const idx = days.findIndex((d) => d.date === today);
-    if (idx >= 0) {
-      setActiveDay(idx);
-      swiperRef.current?.slideTo(idx);
+    if (days.length === 0) return;
+    let idx = -1;
+    if (dateParam) idx = days.findIndex((d) => d.date === dateParam);
+    if (idx < 0) {
+      const today = new Date().toISOString().split('T')[0];
+      idx = days.findIndex((d) => d.date === today);
     }
-  }, [days]);
+    if (idx < 0) idx = 0;
+    setActiveDay(idx);
+    swiperRef.current?.slideTo(idx, 0);
+  }, [days, dateParam]);
+
+  // Reflect the active day in the URL so back/forward and deep links work.
+  const goToDay = (i: number) => {
+    setActiveDay(i);
+    swiperRef.current?.slideTo(i);
+    if (days[i]) navigate(`/schedule/${days[i].date}`, { replace: false });
+  };
 
   // Scroll active tab into view
   useEffect(() => {
@@ -47,14 +61,11 @@ export default function DailySchedule() {
     <div className="flex flex-col h-[calc(100vh-4rem)]">
       {/* Day tabs */}
       <div className="bg-surface border-b border-surface-light sticky top-0 z-10">
-        <div ref={tabsRef} className="flex justify-center overflow-x-auto gap-1 p-2 scrollbar-hide">
+        <div ref={tabsRef} className="flex overflow-x-auto gap-1 p-2 scrollbar-hide [&>*:first-child]:ml-auto [&>*:last-child]:mr-auto">
           {days.map((day, i) => (
             <button
               key={day.date}
-              onClick={() => {
-                setActiveDay(i);
-                swiperRef.current?.slideTo(i);
-              }}
+              onClick={() => goToDay(i)}
               className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
                 i === activeDay
                   ? 'bg-primary-light text-white'
@@ -71,7 +82,11 @@ export default function DailySchedule() {
       <Swiper
         className="flex-1 w-full"
         onSwiper={(swiper) => (swiperRef.current = swiper)}
-        onSlideChange={(swiper) => setActiveDay(swiper.activeIndex)}
+        onSlideChange={(swiper) => {
+          setActiveDay(swiper.activeIndex);
+          const d = days[swiper.activeIndex];
+          if (d) navigate(`/schedule/${d.date}`, { replace: true });
+        }}
         initialSlide={activeDay}
         spaceBetween={0}
         slidesPerView={1}

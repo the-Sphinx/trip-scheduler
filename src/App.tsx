@@ -1,4 +1,4 @@
-import { Routes, Route, NavLink } from 'react-router-dom';
+import { Routes, Route, NavLink, useLocation } from 'react-router-dom';
 import { useTripData } from './context/TripDataContext';
 import Overview from './pages/Overview';
 import DailySchedule from './pages/DailySchedule';
@@ -21,6 +21,8 @@ const navItems = [
 
 function App() {
   const { loading, error, refresh } = useTripData();
+  const location = useLocation();
+  const onOverview = location.pathname === '/';
 
   if (loading) {
     return (
@@ -49,15 +51,17 @@ function App() {
 
   return (
     <div className="flex flex-col min-h-screen max-w-2xl mx-auto">
-      {/* Floating refresh button */}
-      <button
-        onClick={() => refresh()}
-        title="Refresh data from Google Sheets"
-        aria-label="Refresh"
-        className="fixed top-3 right-3 z-50 bg-surface/90 backdrop-blur border border-surface-light rounded-full w-9 h-9 flex items-center justify-center text-text-muted hover:text-primary-light shadow"
-      >
-        ↻
-      </button>
+      {/* Floating refresh button — Overview only */}
+      {onOverview && (
+        <button
+          onClick={() => refresh()}
+          title="Refresh data from Google Sheets"
+          aria-label="Refresh"
+          className="fixed top-3 right-3 z-50 bg-surface/90 backdrop-blur border border-surface-light rounded-full w-9 h-9 flex items-center justify-center text-text-muted hover:text-primary-light shadow"
+        >
+          ↻
+        </button>
+      )}
 
       {/* Bottom navigation */}
       <nav className="fixed bottom-0 left-0 right-0 bg-surface border-t border-surface-light z-50">
@@ -85,6 +89,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Overview />} />
           <Route path="/schedule" element={<DailySchedule />} />
+          <Route path="/schedule/:date" element={<DailySchedule />} />
           <Route path="/hotels" element={<Hotels />} />
           <Route path="/transport" element={<TransportPage />} />
           <Route path="/attractions" element={<Attractions />} />

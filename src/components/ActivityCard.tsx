@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import type { ScheduleItem } from '../types';
 import { useTripData } from '../context/TripDataContext';
 import { resolveScheduleItem } from '../services/resolve';
+import { hasGuide } from '../content/attractions';
 
 const categoryColors: Record<string, string> = {
   sightseeing: 'bg-blue-500/20 text-blue-400',
@@ -31,10 +33,18 @@ export default function ActivityCard({ item }: { item: ScheduleItem }) {
   const resolved = resolveScheduleItem(item, data);
   const thumb = resolved.photo_url;
 
+  // Slug of the linked attraction's guide, if any — shown as a link in the
+  // expanded view (clicking the card still just expands/collapses).
+  const guideSlug = (() => {
+    if (item.ref_type !== 'attraction' || !item.ref_key || !data) return '';
+    const a = data.attractions.find((x) => x.name.toLowerCase() === item.ref_key.toLowerCase());
+    return a?.slug && hasGuide(a.slug) ? a.slug : '';
+  })();
+
   return (
     <div
       className={`bg-surface rounded-lg p-3 cursor-pointer transition-all hover:bg-surface-light relative ${thumb && !expanded ? 'min-h-[6.5rem]' : ''}`}
-      onClick={() => setExpanded(!expanded)}
+      onClick={() => setExpanded((v) => !v)}
     >
       <div className={`flex items-start gap-3 ${thumb && !expanded ? 'pr-32' : ''}`}>
         {/* Time */}
@@ -60,31 +70,42 @@ export default function ActivityCard({ item }: { item: ScheduleItem }) {
           {(item.notes || resolved.notes) && (
             <div className="mt-1 space-y-0.5">
               {item.notes && (
-                <p className={`text-primary-light/80 text-xs italic ${expanded ? '' : 'line-clamp-2'}`}>{item.notes}</p>
+                <p className={`text-blue-200 text-xs italic ${expanded ? '' : 'line-clamp-2'}`}>{item.notes}</p>
               )}
               {resolved.notes && (
-                <p className={`text-primary-light/80 text-xs italic ${expanded ? '' : 'line-clamp-2'}`}>{resolved.notes}</p>
+                <p className={`text-blue-200 text-xs italic ${expanded ? '' : 'line-clamp-2'}`}>{resolved.notes}</p>
               )}
             </div>
           )}
 
           {/* Extra info appears below the notes when expanded — same text-xs as notes */}
-          {expanded && (resolved.address || resolved.website) && (
-            <div className="mt-2 space-y-0.5">
+          {expanded && (resolved.address || resolved.website || guideSlug) && (
+            <div className="mt-2 space-y-1">
               {resolved.address && (
                 <p className="text-text-muted text-xs">🗺️ {resolved.address}</p>
               )}
-              {resolved.website && (
-                <a
-                  href={resolved.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary-light text-xs hover:underline inline-block"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  🌐 Website
-                </a>
-              )}
+              <div className="flex flex-wrap gap-2 pt-0.5">
+                {guideSlug && (
+                  <Link
+                    to={`/attractions/${guideSlug}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-xs px-2 py-1 rounded-full bg-primary-light/20 text-primary-light hover:bg-primary-light/30"
+                  >
+                    📖 Open guide
+                  </Link>
+                )}
+                {resolved.website && (
+                  <a
+                    href={resolved.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs px-2 py-1 rounded-full bg-surface-light text-text hover:bg-surface-light/70"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    🌐 Website
+                  </a>
+                )}
+              </div>
             </div>
           )}
         </div>

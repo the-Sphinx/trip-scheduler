@@ -101,7 +101,7 @@ function RestaurantCard({ restaurant }: { restaurant: Restaurant }) {
         </div>
 
         {restaurant.reservation_required?.toLowerCase() === 'yes' && (
-          <span className="inline-block mt-1.5 text-xs bg-secondary/20 text-secondary px-2 py-0.5 rounded-full">
+          <span className="inline-block mt-1.5 text-xs bg-red-500/25 text-red-300 px-2 py-0.5 rounded-full">
             Reservation required
           </span>
         )}

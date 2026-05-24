@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useTripData } from '../context/TripDataContext';
 import type { Attraction } from '../types';
-import { hasGuide } from '../content/attractions';
 
 export default function Attractions() {
   const { data } = useTripData();
@@ -91,13 +90,10 @@ export default function Attractions() {
 }
 
 function AttractionCard({ attraction }: { attraction: Attraction }) {
-  const [expanded, setExpanded] = useState(false);
   const navigate = useNavigate();
-  const guideAvailable = attraction.slug && hasGuide(attraction.slug);
 
   const onCardClick = () => {
-    if (guideAvailable) navigate(`/attractions/${attraction.slug}`);
-    else setExpanded((v) => !v);
+    if (attraction.slug) navigate(`/attractions/${attraction.slug}`);
   };
 
   return (
@@ -131,39 +127,6 @@ function AttractionCard({ attraction }: { attraction: Attraction }) {
           )}
         </div>
 
-        {expanded && (
-          <div className="mt-3 space-y-2 text-sm">
-            {attraction.address && (
-              <p className="text-text-muted">📍 {attraction.address}</p>
-            )}
-            {attraction.hours && (
-              <p className="text-text-muted">🕐 {attraction.hours}</p>
-            )}
-            {attraction.notes && <p>{attraction.notes}</p>}
-            <div className="flex flex-wrap gap-2 pt-1">
-              {attraction.slug && hasGuide(attraction.slug) && (
-                <Link
-                  to={`/attractions/${attraction.slug}`}
-                  className="text-xs px-3 py-1.5 rounded-full bg-primary-light/20 text-primary-light hover:bg-primary-light/30"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  📖 Open guide
-                </Link>
-              )}
-              {attraction.website && (
-                <a
-                  href={attraction.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs px-3 py-1.5 rounded-full bg-surface-light text-text hover:bg-surface-light/70"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  🌐 Website
-                </a>
-              )}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTripData } from '../context/TripDataContext';
 import type { AttractionGuide, Lang } from '../content/attractions/types';
 import { loadGuide } from '../content/attractions';
@@ -8,7 +8,7 @@ const LANG_KEY = 'attraction-guide-lang';
 
 const labels: Record<Lang, Record<string, string>> = {
   en: {
-    back: 'Attractions',
+    back: 'Back',
     hours: 'Hours',
     price: 'Price',
     address: 'Address',
@@ -21,7 +21,7 @@ const labels: Record<Lang, Record<string, string>> = {
     noGuide: 'No detailed guide written for this attraction yet.',
   },
   tr: {
-    back: 'Gezilecek Yerler',
+    back: 'Geri',
     hours: 'Saatler',
     price: 'Ücret',
     address: 'Adres',
@@ -106,15 +106,16 @@ export default function AttractionGuidePage() {
   }
 
   const locale = guide[lang];
-  const hero = guide.gallery[heroIdx] || guide.gallery[0];
+  // Prefer guide gallery; fall back to the sheet's photo_url; otherwise show a textual header.
+  const hero = guide.gallery[heroIdx] || guide.gallery[0] || attraction?.photo_url || '';
   const mapsUrl = attraction
     ? `https://www.google.com/maps/search/?api=1&query=${attraction.lat},${attraction.lng}`
     : '';
 
   return (
     <div className="pb-24">
-      {/* Hero image */}
-      {hero && (
+      {/* Hero — image if available, otherwise a colored header */}
+      {hero ? (
         <div className="relative">
           <img src={hero} alt={attraction?.name || guide.slug} className="w-full h-64 object-cover" />
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-bg" />
@@ -134,6 +135,42 @@ export default function AttractionGuidePage() {
                 {attraction.category && ` · ${attraction.category}`}
               </p>
             )}
+          </div>
+        </div>
+      ) : (
+        <div className="bg-gradient-to-br from-primary-light/30 to-blue-900/40 px-4 pt-4 pb-6">
+          <div className="flex items-center justify-between mb-4">
+            <BackLink label={t.back} />
+            <LangToggle lang={lang} setLang={setLang} />
+          </div>
+          <h1 className="text-2xl font-bold">
+            {attraction?.name || guide.slug}
+          </h1>
+          {attraction && (
+            <p className="text-text-muted text-sm">
+              {attraction.city}
+              {attraction.category && ` · ${attraction.category}`}
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Gallery — directly below the hero image */}
+      {guide.gallery.length > 1 && (
+        <div className="px-4 pt-3">
+          <div className="grid grid-cols-4 gap-2">
+            {guide.gallery.map((url, i) => (
+              <button
+                key={i}
+                onClick={() => {
+                  setHeroIdx(i);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className={`aspect-square overflow-hidden rounded-lg ${i === heroIdx ? 'ring-2 ring-primary-light' : ''}`}
+              >
+                <img src={url} alt="" className="w-full h-full object-cover" loading="lazy" />
+              </button>
+            ))}
           </div>
         </div>
       )}
@@ -160,27 +197,6 @@ export default function AttractionGuidePage() {
               )}
             </div>
           </div>
-        )}
-
-        {/* Gallery — sits high up so swapping the hero is visible */}
-        {guide.gallery.length > 1 && (
-          <section>
-            <SectionTitle icon="📷">{t.gallery}</SectionTitle>
-            <div className="mt-2 grid grid-cols-4 gap-2">
-              {guide.gallery.map((url, i) => (
-                <button
-                  key={i}
-                  onClick={() => {
-                    setHeroIdx(i);
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }}
-                  className={`aspect-square overflow-hidden rounded-lg ${i === heroIdx ? 'ring-2 ring-primary-light' : ''}`}
-                >
-                  <img src={url} alt="" className="w-full h-full object-cover" loading="lazy" />
-                </button>
-              ))}
-            </div>
-          </section>
         )}
 
         {/* Intro */}
@@ -266,11 +282,21 @@ function SectionTitle({ children, icon }: { children: React.ReactNode; icon?: st
 }
 
 function BackLink({ overlay, label }: { overlay?: boolean; label: string }) {
+  const navigate = useNavigate();
+  const onClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    // Prefer browser history (returns you to the schedule day, the attractions
+    // list, or wherever you came from). Fall back to /attractions if there's
+    // no history (direct URL / hard reload).
+    if (window.history.length > 1) navigate(-1);
+    else navigate('/attractions');
+  };
   return (
     <Link
       to="/attractions"
+      onClick={onClick}
       className={`inline-flex items-center gap-1 text-sm rounded-full px-3 py-1.5 ${
-        overlay ? 'bg-black/40 backdrop-blur text-white' : 'text-text-muted hover:text-text'
+        overlay ? 'bg-black/40 backdrop-blur text-white' : 'bg-surface text-text hover:bg-surface-light'
       }`}
     >
       ← {label}
