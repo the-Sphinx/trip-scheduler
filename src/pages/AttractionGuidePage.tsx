@@ -18,6 +18,7 @@ const labels: Record<Lang, Record<string, string>> = {
     gallery: 'Gallery',
     tips: 'Tips',
     sources: 'Sources',
+    scheduled: 'On your schedule',
     noGuide: 'No detailed guide written for this attraction yet.',
   },
   tr: {
@@ -31,6 +32,7 @@ const labels: Record<Lang, Record<string, string>> = {
     gallery: 'Galeri',
     tips: 'İpuçları',
     sources: 'Kaynaklar',
+    scheduled: 'Programda',
     noGuide: 'Bu mekan için henüz detaylı rehber yazılmadı.',
   },
 };
@@ -198,6 +200,39 @@ export default function AttractionGuidePage() {
             </div>
           </div>
         )}
+
+        {/* Scheduled appearances of this attraction */}
+        {attraction && data && (() => {
+          const matches = data.schedule.filter(
+            (s) => s.ref_type === 'attraction' && s.ref_key.toLowerCase() === attraction.name.toLowerCase()
+          );
+          if (matches.length === 0) return null;
+          return (
+            <section className="bg-surface rounded-xl p-3">
+              <p className="text-[10px] uppercase tracking-wider text-text-muted/80 mb-2">{t.scheduled}</p>
+              <div className="space-y-1.5">
+                {matches.map((s, i) => (
+                  <Link
+                    key={i}
+                    to={`/schedule/${s.date}`}
+                    state={{ scrollTime: s.time_start, scrollActivity: s.activity }}
+                    className="flex items-center gap-3 text-sm hover:bg-surface-light rounded-lg px-2 py-1.5 -mx-1 transition"
+                  >
+                    <span className="text-primary-light flex-shrink-0">📅</span>
+                    <span className="font-medium">
+                      {new Date(s.date + 'T00:00:00').toLocaleDateString(lang === 'tr' ? 'tr-TR' : 'en-US', {
+                        weekday: 'short', month: 'short', day: 'numeric',
+                      })}
+                    </span>
+                    <span className="text-text-muted">·</span>
+                    <span className="text-text-muted">{s.time_start}{s.time_end ? `–${s.time_end}` : ''}</span>
+                    <span className="ml-auto text-text-muted/60">→</span>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          );
+        })()}
 
         {/* Intro */}
         <p className="text-text leading-relaxed">{renderRich(locale.intro)}</p>

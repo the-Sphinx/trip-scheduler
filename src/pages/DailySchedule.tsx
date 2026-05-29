@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import type { Swiper as SwiperType } from 'swiper';
 import 'swiper/css';
@@ -15,6 +15,8 @@ export default function DailySchedule() {
   const { days, data } = useTripData();
   const { date: dateParam } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const scrollState = location.state as { scrollTime?: string; scrollActivity?: string } | null;
   const [activeDay, setActiveDay] = useState(0);
   const swiperRef = useRef<SwiperType | null>(null);
   const tabsRef = useRef<HTMLDivElement>(null);
@@ -39,6 +41,41 @@ export default function DailySchedule() {
     swiperRef.current?.slideTo(i);
     if (days[i]) navigate(`/schedule/${days[i].date}`, { replace: false });
   };
+
+  // Scroll a specific item into view when arriving via "On your schedule" link.
+  // Use a ref so we only act once per (date, time) combo — avoids the cleanup
+  // function cancelling its own setTimeout when we clear state.
+  const scrolledRef = useRef<string>('');
+  useEffect(() => {
+    if (!scrollState?.scrollTime || days.length === 0) return;
+    const day = days[activeDay];
+    if (!day || day.date !== (dateParam || day.date)) return;
+    const key = `${day.date}-${scrollState.scrollTime}-${scrollState.scrollActivity || ''}`;
+    if (scrolledRef.current === key) return;
+    const idx = day.items.findIndex(
+      (it) => it.time_start === scrollState.scrollTime &&
+        (!scrollState.scrollActivity || it.activity === scrollState.scrollActivity)
+    );
+    if (idx < 0) return;
+    scrolledRef.current = key;
+    // Wait for Swiper to settle on the active slide before scrolling.
+    setTimeout(() => {
+      const id = `sched-${day.date}-${day.items[idx].time_start}-${idx}`;
+      const el = document.getElementById(id);
+      if (!el) return;
+      // Walk up to the nearest scrollable ancestor (the swiper slide).
+      let scroller: HTMLElement | null = el.parentElement;
+      while (scroller && getComputedStyle(scroller).overflowY !== 'auto' && scroller.tagName !== 'BODY') {
+        scroller = scroller.parentElement;
+      }
+      if (scroller) {
+        const offset = el.offsetTop - scroller.offsetTop - 8;
+        scroller.scrollTo({ top: Math.max(0, offset), behavior: 'smooth' });
+      } else {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 500);
+  }, [scrollState?.scrollTime, scrollState?.scrollActivity, activeDay, days, dateParam]);
 
   // Scroll active tab into view — scroll only the tabs container, not the page.
   useEffect(() => {
@@ -137,8 +174,9 @@ export default function DailySchedule() {
                   const prevR = prev ? resolveScheduleItem(prev, data) : null;
                   const r = resolveScheduleItem(item, data);
                   const leg = prevR ? estimateLeg(prevR, r) : null;
+                  const itemId = `sched-${day.date}-${item.time_start}-${i}`;
                   return (
-                    <div key={i} className="space-y-1">
+                    <div key={i} id={itemId} className="space-y-1 scroll-mt-20">
                       {leg && (
                         <div className="ml-4 flex items-center gap-1.5 text-[11px] text-text-muted/80 py-0.5">
                           {leg.mode === 'walk' ? '🚶' : leg.mode === 'transit' ? '🚆' : '🛤'}
