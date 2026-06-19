@@ -21,6 +21,15 @@ body {
   @apply w-full h-full;
 }
 
+/* Hide scrollbars on horizontal chip rows (filter chips, etc.) */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* Print: show only the active day slide. Black-on-white, no nav, no map. */
 @media print {
   body { background: #fff !important; color: #000 !important; }

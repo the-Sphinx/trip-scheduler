@@ -101,6 +101,17 @@ export interface ShoppingItem {
   notes: string;
 }
 
+export interface Bookmark {
+  rowIndex: number; // 1-based incl header; first data row = 2
+  image_url: string;
+  file_id: string; // Drive id (for deletion); empty for app-library/external images
+  caption: string;
+  category: string; // free-form label, e.g. transportation / shopping / dont-buy
+  link: string; // optional external URL (e.g. the Instagram post)
+  created_at: string; // ISO timestamp
+  added_by: string;
+}
+
 export interface TripData {
   overview: CityStop[];
   schedule: ScheduleItem[];
@@ -109,6 +120,7 @@ export interface TripData {
   attractions: Attraction[];
   restaurants: Restaurant[];
   shopping: ShoppingItem[];
+  bookmarks: Bookmark[];
 }
 
 export interface DaySchedule {
