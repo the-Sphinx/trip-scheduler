@@ -7,6 +7,7 @@ import TransportPage from './pages/Transport';
 import Attractions from './pages/Attractions';
 import Restaurants from './pages/Restaurants';
 import Shopping from './pages/Shopping';
+import Bookmarks from './pages/Bookmarks';
 import AttractionGuidePage from './pages/AttractionGuidePage';
 
 const navItems = [
@@ -17,6 +18,7 @@ const navItems = [
   { to: '/attractions', label: 'Sights', icon: '⛩️' },
   { to: '/restaurants', label: 'Food', icon: '🍜' },
   { to: '/shopping', label: 'Shopping', icon: '🛍️' },
+  { to: '/bookmarks', label: 'Saved', icon: '🔖' },
 ];
 
 function App() {
@@ -72,13 +74,13 @@ function App() {
               to={item.to}
               end={item.to === '/'}
               className={({ isActive }) =>
-                `flex flex-col items-center py-2 px-1 text-xs transition-colors ${
+                `flex-1 min-w-0 flex flex-col items-center py-2 px-0.5 text-[10px] transition-colors ${
                   isActive ? 'text-primary-light' : 'text-text-muted'
                 }`
               }
             >
               <span className="text-lg mb-0.5">{item.icon}</span>
-              <span>{item.label}</span>
+              <span className="max-w-full truncate">{item.label}</span>
             </NavLink>
           ))}
         </div>
@@ -96,6 +98,7 @@ function App() {
           <Route path="/attractions/:slug" element={<AttractionGuidePage />} />
           <Route path="/restaurants" element={<Restaurants />} />
           <Route path="/shopping" element={<Shopping />} />
+          <Route path="/bookmarks" element={<Bookmarks />} />
         </Routes>
       </main>
     </div>

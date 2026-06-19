@@ -20,8 +20,27 @@ interface DeletePayload {
   tab: string;
   rowIndex: number;
 }
+interface UploadImagePayload {
+  action: 'uploadImage';
+  tab: string;
+  dataBase64: string;
+  mimeType: string;
+  filename: string;
+  caption: string;
+  category: string;
+  link: string;
+  added_by: string;
+}
+interface DeleteBookmarkPayload {
+  action: 'deleteBookmark';
+  tab: string;
+  rowIndex: number;
+  fileId: string;
+}
 
-async function call(body: AppendPayload | UpdatePayload | DeletePayload): Promise<{ ok?: boolean; rowIndex?: number; error?: string }> {
+type Payload = AppendPayload | UpdatePayload | DeletePayload | UploadImagePayload | DeleteBookmarkPayload;
+
+async function call(body: Payload): Promise<{ ok?: boolean; rowIndex?: number; url?: string; fileId?: string; error?: string }> {
   if (!URL_) throw new Error('VITE_APPS_SCRIPT_URL not configured');
   const res = await fetch(URL_, {
     method: 'POST',
@@ -44,4 +63,34 @@ export function updateRow(tab: string, rowIndex: number, row: (string | number |
 
 export function deleteRow(tab: string, rowIndex: number) {
   return call({ action: 'delete', tab, rowIndex });
+}
+
+export interface UploadImageInput {
+  dataBase64: string;
+  mimeType: string;
+  filename: string;
+  caption?: string;
+  category?: string;
+  link?: string;
+  added_by?: string;
+}
+
+// Upload an image to Drive + append a Bookmarks row. Returns the public URL,
+// Drive file id, and the new row index.
+export function uploadImage(input: UploadImageInput) {
+  return call({
+    action: 'uploadImage',
+    tab: 'Bookmarks',
+    dataBase64: input.dataBase64,
+    mimeType: input.mimeType,
+    filename: input.filename,
+    caption: input.caption || '',
+    category: input.category || '',
+    link: input.link || '',
+    added_by: input.added_by || '',
+  });
+}
+
+export function deleteBookmark(rowIndex: number, fileId: string) {
+  return call({ action: 'deleteBookmark', tab: 'Bookmarks', rowIndex, fileId });
 }

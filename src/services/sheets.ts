@@ -1,4 +1,4 @@
-import type { TripData, CityStop, ScheduleItem, Hotel, Transport, Attraction, Restaurant, ShoppingItem } from '../types';
+import type { TripData, CityStop, ScheduleItem, Hotel, Transport, Attraction, Restaurant, ShoppingItem, Bookmark } from '../types';
 import { setCache, getCache, getCacheStale } from './cache';
 
 const SHEETS_CACHE_KEY = 'sheets-data';
@@ -136,6 +136,21 @@ function parseShopping(rows: string[][]): ShoppingItem[] {
   }));
 }
 
+function parseBookmarks(rows: string[][]): Bookmark[] {
+  if (rows.length < 2) return [];
+  const headers = rows[0].map((h) => h.trim().toLowerCase().replace(/\s+/g, '_'));
+  return rows.slice(1).map((row, i) => ({
+    rowIndex: i + 2,
+    image_url: col(row, headers, 'image_url'),
+    file_id: col(row, headers, 'file_id'),
+    caption: col(row, headers, 'caption'),
+    category: col(row, headers, 'category'),
+    link: col(row, headers, 'link'),
+    created_at: col(row, headers, 'created_at'),
+    added_by: col(row, headers, 'added_by'),
+  }));
+}
+
 function parseRestaurant(row: string[], headers: string[]): Restaurant {
   return {
     name: col(row, headers, 'name'),
@@ -164,7 +179,7 @@ export async function fetchTripData(force = false): Promise<TripData> {
   }
 
   try {
-    const [overviewRows, scheduleRows, hotelRows, transportRows, attractionRows, restaurantRows, shoppingRows] =
+    const [overviewRows, scheduleRows, hotelRows, transportRows, attractionRows, restaurantRows, shoppingRows, bookmarkRows] =
       await Promise.all([
         fetchSheet('Overview'),
         fetchSheet('Schedule'),
@@ -173,6 +188,7 @@ export async function fetchTripData(force = false): Promise<TripData> {
         fetchSheet('Attractions'),
         fetchSheet('Restaurants'),
         fetchSheet('Shopping').catch(() => [] as string[][]),
+        fetchSheet('Bookmarks').catch(() => [] as string[][]),
       ]);
 
     const data: TripData = {
@@ -183,6 +199,7 @@ export async function fetchTripData(force = false): Promise<TripData> {
       attractions: parseRows(attractionRows, parseAttraction),
       restaurants: parseRows(restaurantRows, parseRestaurant),
       shopping: parseShopping(shoppingRows),
+      bookmarks: parseBookmarks(bookmarkRows),
     };
 
     setCache(SHEETS_CACHE_KEY, data, CACHE_TTL);
