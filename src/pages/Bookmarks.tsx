@@ -53,7 +53,7 @@ export default function Bookmarks() {
     setLocal((prev) => {
       const byRow = new Map(prev.filter((r) => r.rowIndex).map((r) => [r.rowIndex, r]));
       const pending = prev.filter((r) => r.pending || !r.rowIndex);
-      const merged: LocalBookmark[] = data.bookmarks.map((b) => {
+      const merged: LocalBookmark[] = (data.bookmarks ?? []).map((b) => {
         const existing = byRow.get(b.rowIndex);
         if (existing?.pending) return existing; // keep optimistic values mid-write
         let localId = existing?.localId || localIdByRow.current.get(b.rowIndex);
