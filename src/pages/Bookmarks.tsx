@@ -40,6 +40,7 @@ interface Draft {
   caption: string;
   category: string;
   link: string;
+  rotation: number; // degrees, 0/90/180/270
 }
 
 export default function Bookmarks() {
@@ -121,12 +122,15 @@ export default function Bookmarks() {
       link: draft.link,
       created_at: new Date().toISOString(),
       added_by: '',
+      // Show the picked (un-baked) file rotated via CSS until the upload lands;
+      // the uploaded file has the rotation baked in, so it resolves to 0.
+      rotation: draft.rotation,
       pending: true,
       localPreview: preview,
     };
     applyLocal((rows) => [temp, ...rows]);
     try {
-      const img = await compressImage(file);
+      const img = await compressImage(file, undefined, undefined, draft.rotation);
       const res = await uploadImage({
         dataBase64: img.base64,
         mimeType: img.mimeType,
@@ -139,7 +143,7 @@ export default function Bookmarks() {
       applyLocal((rows) =>
         rows.map((r) =>
           r.localId === localId
-            ? { ...r, rowIndex: res.rowIndex || 0, image_url: res.url || '', file_id: res.fileId || '', pending: false }
+            ? { ...r, rowIndex: res.rowIndex || 0, image_url: res.url || '', file_id: res.fileId || '', rotation: 0, localPreview: undefined, pending: false }
             : r
         )
       );
@@ -159,10 +163,11 @@ export default function Bookmarks() {
     const temp: LocalBookmark = {
       localId, rowIndex: 0, image_url: url, file_id: '',
       caption: draft.caption, category: draft.category, link: draft.link,
-      created_at: createdAt, added_by: '', pending: true,
+      created_at: createdAt, added_by: '', rotation: draft.rotation, pending: true,
     };
     applyLocal((rows) => [temp, ...rows]);
-    appendRow('Bookmarks', [url, '', draft.caption, draft.category, draft.link, createdAt, ''])
+    // App-library images aren't re-uploaded, so persist rotation as metadata.
+    appendRow('Bookmarks', [url, '', draft.caption, draft.category, draft.link, createdAt, '', draft.rotation])
       .then((res) => {
         applyLocal((rows) => rows.map((r) => (r.localId === localId ? { ...r, rowIndex: res.rowIndex || 0, pending: false } : r)));
         refresh();
@@ -176,7 +181,7 @@ export default function Bookmarks() {
     const next: LocalBookmark = { ...row, ...draft, pending: true, error: undefined };
     applyLocal((rows) => rows.map((r) => (r.localId === row.localId ? next : r)));
     updateRow('Bookmarks', row.rowIndex, [
-      next.image_url, next.file_id, next.caption, next.category, next.link, next.created_at, next.added_by,
+      next.image_url, next.file_id, next.caption, next.category, next.link, next.created_at, next.added_by, next.rotation ?? 0,
     ])
       .then(() => {
         applyLocal((rows) => rows.map((r) => (r.localId === row.localId ? { ...r, pending: false } : r)));
@@ -245,6 +250,7 @@ export default function Bookmarks() {
                 alt={b.caption || 'bookmark'}
                 loading="lazy"
                 className="absolute inset-0 w-full h-full object-cover"
+                style={b.rotation ? { transform: `rotate(${b.rotation}deg)` } : undefined}
               />
               {/* Caption / category overlay */}
               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-2 pt-6">
@@ -346,12 +352,17 @@ function AddModal({
   const [preview, setPreview] = useState<string>('');
   const [appImages, setAppImages] = useState<AppImage[] | null>(null);
   const [showLibraryPicker, setShowLibraryPicker] = useState(false);
-  const [draft, setDraft] = useState<Draft>({ caption: '', category: '', link: '' });
+  const [draft, setDraft] = useState<Draft>({ caption: '', category: '', link: '', rotation: 0 });
+
+  function rotate() {
+    setDraft((d) => ({ ...d, rotation: ((d.rotation + 90) % 360) }));
+  }
 
   function pick(f: File | null) {
     if (!f) return;
     setAppImage(null);
     setFile(f);
+    setDraft((d) => ({ ...d, rotation: 0 }));
     setPreview((p) => { if (p) URL.revokeObjectURL(p); return URL.createObjectURL(f); });
   }
 
@@ -371,7 +382,7 @@ function AddModal({
     setFile(null);
     setAppImage(img);
     setPreview(`${import.meta.env.BASE_URL}${img.url.replace(/^\//, '')}`);
-    if (img.category && !draft.category) setDraft((d) => ({ ...d, category: img.category! }));
+    setDraft((d) => ({ ...d, rotation: 0, category: img.category && !d.category ? img.category : d.category }));
     setShowLibraryPicker(false);
   }
 
@@ -392,8 +403,16 @@ function AddModal({
       {/* Image preview / source picker */}
       {hasImage ? (
         <div className="relative mb-3">
-          <img src={preview} alt="preview" className="w-full max-h-56 object-contain rounded-xl bg-black/30" />
-          <button onClick={() => { setFile(null); setAppImage(null); setPreview(''); }} className="absolute top-2 right-2 bg-black/60 text-white rounded-full w-7 h-7 flex items-center justify-center text-sm">✕</button>
+          <div className="flex items-center justify-center h-56 rounded-xl bg-black/30 overflow-hidden">
+            <img
+              src={preview}
+              alt="preview"
+              className="max-h-[14rem] max-w-[14rem] object-contain transition-transform"
+              style={draft.rotation ? { transform: `rotate(${draft.rotation}deg)` } : undefined}
+            />
+          </div>
+          <button onClick={rotate} title="Rotate 90°" aria-label="Rotate" className="absolute top-2 left-2 bg-black/60 text-white rounded-full w-8 h-8 flex items-center justify-center">↻</button>
+          <button onClick={() => { setFile(null); setAppImage(null); setPreview(''); setDraft((d) => ({ ...d, rotation: 0 })); }} aria-label="Remove image" className="absolute top-2 right-2 bg-black/60 text-white rounded-full w-7 h-7 flex items-center justify-center text-sm">✕</button>
         </div>
       ) : (
         <div className="grid grid-cols-3 gap-2 mb-3">
@@ -438,11 +457,21 @@ function AddModal({
 }
 
 function EditModal({ bookmark, onClose, onSave, onDelete }: { bookmark: Bookmark; onClose: () => void; onSave: (d: Draft) => void; onDelete: () => void }) {
-  const [draft, setDraft] = useState<Draft>({ caption: bookmark.caption, category: bookmark.category, link: bookmark.link });
+  const [draft, setDraft] = useState<Draft>({ caption: bookmark.caption, category: bookmark.category, link: bookmark.link, rotation: bookmark.rotation || 0 });
   return (
     <Modal onClose={onClose}>
       <h2 className="text-lg font-semibold mb-3">Edit bookmark</h2>
-      <img src={bookmark.image_url} alt="" className="w-full max-h-40 object-contain rounded-xl bg-black/30 mb-3" />
+      <div className="relative mb-3">
+        <div className="flex items-center justify-center h-40 rounded-xl bg-black/30 overflow-hidden">
+          <img
+            src={bookmark.image_url}
+            alt=""
+            className="max-h-[10rem] max-w-[10rem] object-contain transition-transform"
+            style={draft.rotation ? { transform: `rotate(${draft.rotation}deg)` } : undefined}
+          />
+        </div>
+        <button onClick={() => setDraft((d) => ({ ...d, rotation: (d.rotation + 90) % 360 }))} title="Rotate 90°" aria-label="Rotate" className="absolute top-2 left-2 bg-black/60 text-white rounded-full w-8 h-8 flex items-center justify-center">↻</button>
+      </div>
       <MetaFields draft={draft} setDraft={setDraft} />
       <div className="flex items-center justify-between pt-4">
         <button onClick={onDelete} className="text-red-300 text-sm px-3 py-1.5 rounded hover:bg-red-500/10">🗑️ Delete</button>
@@ -523,10 +552,12 @@ function Lightbox({ bookmark, onClose, onEdit, onDelete }: { bookmark: LocalBook
   return (
     <div className="fixed inset-0 bg-black/90 z-[60] flex flex-col" onClick={onClose}>
       <div className="flex-1 flex items-center justify-center p-4 min-h-0" onClick={onClose}>
+        {/* Bound by vmin so a 90°/270° rotation always stays within the viewport. */}
         <img
           src={bookmark.localPreview || bookmark.image_url}
           alt={bookmark.caption || ''}
-          className="max-w-full max-h-full object-contain"
+          className="max-w-[90vmin] max-h-[90vmin] object-contain transition-transform"
+          style={bookmark.rotation ? { transform: `rotate(${bookmark.rotation}deg)` } : undefined}
           onClick={(e) => e.stopPropagation()}
         />
       </div>

@@ -110,6 +110,7 @@ export interface Bookmark {
   link: string; // optional external URL (e.g. the Instagram post)
   created_at: string; // ISO timestamp
   added_by: string;
+  rotation: number; // display rotation in degrees (0/90/180/270)
 }
 
 export interface TripData {

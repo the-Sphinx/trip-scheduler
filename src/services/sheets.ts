@@ -148,6 +148,7 @@ function parseBookmarks(rows: string[][]): Bookmark[] {
     link: col(row, headers, 'link'),
     created_at: col(row, headers, 'created_at'),
     added_by: col(row, headers, 'added_by'),
+    rotation: num(col(row, headers, 'rotation')),
   }));
 }
 

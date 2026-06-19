@@ -39,7 +39,8 @@ async function loadBitmap(file: File): Promise<ImageBitmap | HTMLImageElement> {
 export async function compressImage(
   file: File,
   maxDim = MAX_DIM,
-  quality = QUALITY
+  quality = QUALITY,
+  rotation = 0
 ): Promise<CompressedImage> {
   const bitmap = await loadBitmap(file);
   const srcW = (bitmap as ImageBitmap).width || (bitmap as HTMLImageElement).naturalWidth;
@@ -49,12 +50,18 @@ export async function compressImage(
   const w = Math.max(1, Math.round(srcW * scale));
   const h = Math.max(1, Math.round(srcH * scale));
 
+  // Bake the rotation into the output so the stored file is correctly oriented.
+  const rot = (((rotation % 360) + 360) % 360) as 0 | 90 | 180 | 270;
+  const swap = rot === 90 || rot === 270;
+
   const canvas = document.createElement('canvas');
-  canvas.width = w;
-  canvas.height = h;
+  canvas.width = swap ? h : w;
+  canvas.height = swap ? w : h;
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('Canvas not supported');
-  ctx.drawImage(bitmap as CanvasImageSource, 0, 0, w, h);
+  ctx.translate(canvas.width / 2, canvas.height / 2);
+  if (rot) ctx.rotate((rot * Math.PI) / 180);
+  ctx.drawImage(bitmap as CanvasImageSource, -w / 2, -h / 2, w, h);
   if ('close' in bitmap && typeof bitmap.close === 'function') bitmap.close();
 
   const dataUrl = canvas.toDataURL('image/jpeg', quality);
