@@ -68,6 +68,13 @@ fine (empty / read-only via the graceful fallback); only new uploads fail.
 - To keep the same `/exec` URL across script changes, use **Manage deployments →
   edit → New version**, not "New deployment".
 
+**Rotation (added later):** 90° rotate control in both the add sheet and the
+edit modal. On **add**, the angle is baked into the uploaded image (canvas), so
+the stored Drive file is correctly oriented (verified: 40×20 → 20×40 on 90°).
+On **edit** (and app-library images), the angle is stored as a `rotation` column
+(degrees) and applied as a CSS transform on the grid tile + lightbox — no
+re-upload, no Apps Script redeploy. Old cached rows without the column read as 0.
+
 **Deferred / future:** reuse bookmark `image_url`s in Shopping items (data is
 already shaped for it — `image_url` is a stable public URL); place/day
 ref-linking; the app-image library is empty (`public/library/manifest.json` =
