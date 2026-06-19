@@ -3,13 +3,23 @@
 // Setup:
 //   1. Open the sheet → Extensions → Apps Script
 //   2. Replace Code.gs contents with this file
-//   3. Deploy → New deployment → type: Web app
+//   3. In the editor, select the `setup` function and click Run once.
+//      Approve the permission prompt (Sheets + Drive) — this grants the Drive
+//      access the image upload needs. Required after adding uploadImage.
+//   4. Deploy → Manage deployments → edit (✏️) → Version: New version → Deploy
 //        - Execute as: Me
-//        - Who has access: Anyone
-//   4. Copy the /exec URL, paste into the app's VITE_APPS_SCRIPT_URL env
+//        - Who has access: Anyone   (NOT "Anyone with Google account")
+//   5. Copy the /exec URL, paste into the app's VITE_APPS_SCRIPT_URL env
 
 const SHEET_ID = '1P0pucbfoJFnqnnAX1dEjmDq96TGTJb7Qz66sPZiGIGc';
 const SECRET = 'AdaDenizTrip2026';
+
+// Run this once from the editor to grant the Drive permission the upload
+// feature needs (approve the consent prompt when asked). Safe to re-run.
+function setup() {
+  const folder = getOrCreateFolder_('TripBookmarks');
+  Logger.log('Drive folder ready: %s (%s)', folder.getName(), folder.getId());
+}
 
 function doPost(e) {
   try {
