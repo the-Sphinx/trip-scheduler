@@ -57,6 +57,17 @@ Script must be redeployed with the new `uploadImage`/`deleteBookmark` actions
 and the Drive permission approved (see tasks.md §1). Until then the page loads
 fine (empty / read-only via the graceful fallback); only new uploads fail.
 
+**Deployment gotchas (resolved during rollout):**
+- The Apps Script web app must have **Who has access: Anyone** (NOT "Anyone with
+  Google account") — otherwise `/exec` redirects to a Google sign-in page and
+  browser `fetch` fails.
+- Adding `DriveApp` introduced a new OAuth scope. Redeploying does **not** grant
+  it; you must **Run the `setup()` function once** in the editor and approve the
+  Drive consent prompt. Symptom otherwise: `Exception: You don't have permission
+  to call DriveApp.getFoldersByName`.
+- To keep the same `/exec` URL across script changes, use **Manage deployments →
+  edit → New version**, not "New deployment".
+
 **Deferred / future:** reuse bookmark `image_url`s in Shopping items (data is
 already shaped for it — `image_url` is a stable public URL); place/day
 ref-linking; the app-image library is empty (`public/library/manifest.json` =
