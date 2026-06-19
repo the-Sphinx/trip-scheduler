@@ -171,11 +171,27 @@ function parseRestaurant(row: string[], headers: string[]): Restaurant {
   };
 }
 
+// Backfill any array fields missing from an older cached payload. Without this,
+// a visitor whose cache predates a newly-added field (e.g. `bookmarks`) would
+// read `undefined` and crash on `.map`. Idempotent on fresh data.
+function normalize(d: Partial<TripData> | null): TripData {
+  return {
+    overview: d?.overview ?? [],
+    schedule: d?.schedule ?? [],
+    hotels: d?.hotels ?? [],
+    transport: d?.transport ?? [],
+    attractions: d?.attractions ?? [],
+    restaurants: d?.restaurants ?? [],
+    shopping: d?.shopping ?? [],
+    bookmarks: d?.bookmarks ?? [],
+  };
+}
+
 export async function fetchTripData(force = false): Promise<TripData> {
   // Try cache first (unless force-refresh)
   if (!force) {
     const cached = getCache<TripData>(SHEETS_CACHE_KEY);
-    if (cached) return cached;
+    if (cached) return normalize(cached);
   }
 
   try {
@@ -207,7 +223,7 @@ export async function fetchTripData(force = false): Promise<TripData> {
   } catch (error) {
     // Fallback to stale cache if available
     const stale = getCacheStale<TripData>(SHEETS_CACHE_KEY);
-    if (stale) return stale;
+    if (stale) return normalize(stale);
     throw error;
   }
 }
