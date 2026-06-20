@@ -1,7 +1,10 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTripData } from '../context/TripDataContext';
 import { resolveScheduleItem } from '../services/resolve';
 import TripWeatherStrip from '../components/TripWeatherStrip';
+import DayMapViewer from '../components/DayMapViewer';
+import { dayMaps, dayMapUrl } from '../data/dayMaps';
 
 const transportIcons: Record<string, string> = {
   flight: '✈️',
@@ -13,6 +16,7 @@ const transportIcons: Record<string, string> = {
 
 export default function Overview() {
   const { data, days } = useTripData();
+  const [viewerIndex, setViewerIndex] = useState<number | null>(null);
   if (!data) return null;
 
   const today = new Date().toISOString().split('T')[0];
@@ -62,6 +66,28 @@ export default function Overview() {
 
       {/* Daily weather strip */}
       <TripWeatherStrip days={days} />
+
+      {/* Illustrated day guides */}
+      {dayMaps.length > 0 && (
+        <div className="mt-4">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-sm font-semibold text-text-muted uppercase tracking-wide">Illustrated day guides</h2>
+            <button onClick={() => setViewerIndex(0)} className="text-xs text-primary-light">Browse all →</button>
+          </div>
+          <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 no-scrollbar">
+            {dayMaps.map((dm, i) => (
+              <button
+                key={dm.date}
+                onClick={() => setViewerIndex(i)}
+                className="flex-shrink-0 w-28 rounded-xl overflow-hidden bg-surface border border-surface-light active:scale-95 transition-transform"
+              >
+                <img src={dayMapUrl(dm.src)} alt={`Day ${dm.dayNumber}`} loading="lazy" className="w-28 h-40 object-cover object-top" />
+                <div className="text-[11px] text-text-muted py-1 text-center">Day {dm.dayNumber}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Route visualization */}
       <div className="relative">
@@ -131,6 +157,10 @@ export default function Overview() {
         <StatCard label="Hotels" value={data.hotels.length.toString()} />
         <StatCard label="Activities" value={data.schedule.length.toString()} />
       </div>
+
+      {viewerIndex !== null && (
+        <DayMapViewer startIndex={viewerIndex} onClose={() => setViewerIndex(null)} />
+      )}
     </div>
   );
 }
