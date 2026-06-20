@@ -10,6 +10,8 @@ import ActivityCard from '../components/ActivityCard';
 import MapView from '../components/MapView';
 import WeatherWidget from '../components/WeatherWidget';
 import HotelCard from '../components/HotelCard';
+import DayMapViewer from '../components/DayMapViewer';
+import { getDayMap, getDayMapIndex, dayMapUrl } from '../data/dayMaps';
 
 export default function DailySchedule() {
   const { days, data } = useTripData();
@@ -18,6 +20,7 @@ export default function DailySchedule() {
   const location = useLocation();
   const scrollState = location.state as { scrollTime?: string; scrollActivity?: string } | null;
   const [activeDay, setActiveDay] = useState(0);
+  const [viewerIndex, setViewerIndex] = useState<number | null>(null);
   const swiperRef = useRef<SwiperType | null>(null);
   const tabsRef = useRef<HTMLDivElement>(null);
 
@@ -167,6 +170,26 @@ export default function DailySchedule() {
                 />
               )}
 
+              {/* Illustrated day guide (if one exists for this date) */}
+              {getDayMap(day.date) && (
+                <button
+                  onClick={() => setViewerIndex(getDayMapIndex(day.date))}
+                  className="flex items-center gap-3 w-full bg-surface rounded-xl p-2 border border-surface-light active:scale-[0.99] transition-transform text-left"
+                >
+                  <img
+                    src={dayMapUrl(getDayMap(day.date)!.src)}
+                    alt="Day guide"
+                    loading="lazy"
+                    className="w-12 h-16 rounded-lg object-cover object-top flex-shrink-0"
+                  />
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium">📋 Illustrated day guide</p>
+                    <p className="text-xs text-text-muted">Tap to view the route map · pinch to zoom</p>
+                  </div>
+                  <span className="ml-auto text-text-muted pr-1">›</span>
+                </button>
+              )}
+
               {/* Activity timeline */}
               <div className="space-y-1">
                 {day.items.map((item, i) => {
@@ -208,6 +231,10 @@ export default function DailySchedule() {
           </SwiperSlide>
         ))}
       </Swiper>
+
+      {viewerIndex !== null && (
+        <DayMapViewer startIndex={viewerIndex} onClose={() => setViewerIndex(null)} />
+      )}
     </div>
   );
 }
