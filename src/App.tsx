@@ -1,5 +1,6 @@
 import { Routes, Route, NavLink, useLocation } from 'react-router-dom';
 import { useTripData } from './context/TripDataContext';
+import { refreshApp } from './services/sw-register';
 import Overview from './pages/Overview';
 import DailySchedule from './pages/DailySchedule';
 import Hotels from './pages/Hotels';
@@ -56,7 +57,7 @@ function App() {
       {/* Floating refresh button — Overview only */}
       {onOverview && (
         <button
-          onClick={() => refresh()}
+          onClick={() => { refresh(); refreshApp(); }}
           title="Refresh data from Google Sheets"
           aria-label="Refresh"
           className="fixed top-3 right-3 z-50 bg-surface/90 backdrop-blur border border-surface-light rounded-full w-9 h-9 flex items-center justify-center text-text-muted hover:text-primary-light shadow"

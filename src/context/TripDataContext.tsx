@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import type { TripData, DaySchedule } from '../types';
 import { fetchTripData } from '../services/sheets';
+import { warmCache } from '../services/sw-register';
+import { dayMaps, dayMapUrl } from '../data/dayMaps';
 
 interface TripDataContextType {
   data: TripData | null;
@@ -82,6 +84,14 @@ export function TripDataProvider({ children }: { children: ReactNode }) {
       const tripData = await fetchTripData(force);
       setData(tripData);
       setDays(buildDays(tripData));
+      // Warm the offline cache with all trip images (day guides + reservation
+      // docs + bookmarks) so they're available offline after one online load.
+      warmCache([
+        ...dayMaps.map((d) => dayMapUrl(d.src)),
+        ...tripData.hotels.flatMap((h) => h.images ?? []),
+        ...tripData.transport.flatMap((t) => t.images ?? []),
+        ...tripData.bookmarks.map((b) => b.image_url),
+      ]);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load trip data');
     } finally {
