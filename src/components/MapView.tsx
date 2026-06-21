@@ -80,42 +80,55 @@ export default function MapView({ items, startHotel, endHotel }: Props) {
     googleMapsApiKey: apiKey || '',
   });
 
-  // Build ordered point list: [startHotel, ...resolved items, endHotel]
-  // Build the ordered point list, then merge consecutive (or any) points that
-  // share the same location — multi-stop stations like "08:15 Hankyu" and
-  // "07:45 Walk arrives Kawaramachi" would otherwise stack on top of each other.
-  const points = useMemo(() => {
+  // Build the ordered, time-sequenced point list, then derive two views:
+  //  - `points`  : markers — ALL coincident points merged so pins don't stack
+  //                (e.g. multi-stop stations, or a hotel that's both start + checkout).
+  //  - `routeSeq`: the route/line — only CONSECUTIVE coincident stops collapse, so
+  //                revisits are preserved (e.g. Sakura → Arashiyama → back to Sakura).
+  const { points, routeSeq } = useMemo(() => {
     type Pt = { lat: number; lng: number; label: string; titles: string[]; kind: 'hotel' | 'item'; name: string; placeId: string };
-    const raw: Pt[] = [];
-    const push = (p: Pt) => {
-      const COORD_EPS = 1e-4; // ~10m
-      const i = raw.findIndex((q) => Math.abs(q.lat - p.lat) < COORD_EPS && Math.abs(q.lng - p.lng) < COORD_EPS);
-      if (i >= 0) {
-        raw[i].titles.push(...p.titles);
-        // Keep the earliest label (already the first), but indicate multiple stops
-        if (raw[i].kind === 'item' && /^\d/.test(raw[i].label)) {
-          const count = raw[i].titles.length;
-          raw[i].label = raw[i].label.replace(/\s*\+\d+$/, '') + (count > 1 ? ` +${count - 1}` : '');
-        }
-        return;
-      }
-      raw.push(p);
-    };
+    const COORD_EPS = 1e-4; // ~10m
+    const coincident = (a: Pt, b: Pt) => Math.abs(a.lat - b.lat) < COORD_EPS && Math.abs(a.lng - b.lng) < COORD_EPS;
 
+    const seq: Pt[] = [];
     if (startHotel && startHotel.lat && startHotel.lng) {
-      push({ lat: startHotel.lat, lng: startHotel.lng, label: '🏨', titles: [`Start: ${startHotel.name}`], kind: 'hotel', name: startHotel.name, placeId: startHotel.place_id ?? '' });
+      seq.push({ lat: startHotel.lat, lng: startHotel.lng, label: '🏨', titles: [`Start: ${startHotel.name}`], kind: 'hotel', name: startHotel.name, placeId: startHotel.place_id ?? '' });
     }
     for (const item of items) {
       const r = resolveScheduleItem(item, data);
       if (r.lat && r.lng) {
         const t = (item.time_start || '').padStart(5, '0');
-        push({ lat: r.lat, lng: r.lng, label: t || '•', titles: [`${item.time_start ? item.time_start + ' · ' : ''}${item.activity}`], kind: 'item', name: r.location_name || item.activity, placeId: r.place_id });
+        seq.push({ lat: r.lat, lng: r.lng, label: t || '•', titles: [`${item.time_start ? item.time_start + ' · ' : ''}${item.activity}`], kind: 'item', name: r.location_name || item.activity, placeId: r.place_id });
       }
     }
     if (endHotel && endHotel.lat && endHotel.lng) {
-      push({ lat: endHotel.lat, lng: endHotel.lng, label: '🏨', titles: [`End: ${endHotel.name}`], kind: 'hotel', name: endHotel.name, placeId: endHotel.place_id ?? '' });
+      seq.push({ lat: endHotel.lat, lng: endHotel.lng, label: '🏨', titles: [`End: ${endHotel.name}`], kind: 'hotel', name: endHotel.name, placeId: endHotel.place_id ?? '' });
     }
-    return raw;
+
+    // Markers: merge any coincident points (copies, so we don't mutate seq).
+    const points: Pt[] = [];
+    for (const p of seq) {
+      const i = points.findIndex((q) => coincident(q, p));
+      if (i >= 0) {
+        points[i].titles.push(...p.titles);
+        if (points[i].kind === 'item' && /^\d/.test(points[i].label)) {
+          const count = points[i].titles.length;
+          points[i].label = points[i].label.replace(/\s*\+\d+$/, '') + (count > 1 ? ` +${count - 1}` : '');
+        }
+      } else {
+        points.push({ ...p, titles: [...p.titles] });
+      }
+    }
+
+    // Route/line: collapse only consecutive coincident stops; keep revisits.
+    const routeSeq: Pt[] = [];
+    for (const p of seq) {
+      const last = routeSeq[routeSeq.length - 1];
+      if (last && coincident(last, p)) continue;
+      routeSeq.push(p);
+    }
+
+    return { points, routeSeq };
   }, [items, startHotel, endHotel, data]);
 
   const center = useMemo(() => {
@@ -137,10 +150,11 @@ export default function MapView({ items, startHotel, endHotel }: Props) {
     map.fitBounds(bounds, 40);
   };
 
-  const path = useMemo(() => points.map((p) => ({ lat: p.lat, lng: p.lng })), [points]);
+  // Line + Maps route follow the time sequence (revisits preserved).
+  const path = useMemo(() => routeSeq.map((p) => ({ lat: p.lat, lng: p.lng })), [routeSeq]);
   const mapsUrl = useMemo(
-    () => buildMapsUrl(points.map((p) => ({ lat: p.lat, lng: p.lng, name: p.name, placeId: p.placeId }))),
-    [points]
+    () => buildMapsUrl(routeSeq.map((p) => ({ lat: p.lat, lng: p.lng, name: p.name, placeId: p.placeId }))),
+    [routeSeq]
   );
 
   if (!apiKey) {
