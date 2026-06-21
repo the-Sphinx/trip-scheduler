@@ -26,14 +26,19 @@ interface Props {
 
 // Build a Google Maps directions URL that draws all the day's stops in order
 // (markers + route line). Opens the Maps app on mobile, the website on desktop.
-// The Maps URLs API allows ~9 waypoints between origin and destination; if a
-// day has more mapped stops, sample the middle ones evenly to keep the shape.
+// We pass each stop's NAME (so the Maps side panel shows readable place names
+// instead of reverse-geocoded addresses), falling back to coordinates when a
+// stop has no name. The Maps URLs API allows ~9 waypoints between origin and
+// destination; if a day has more mapped stops, sample the middle ones evenly.
+type UrlPoint = { lat: number; lng: number; query: string };
 const MAX_WAYPOINTS = 9;
-function buildMapsUrl(pts: { lat: number; lng: number }[]): string {
-  const fmt = (p: { lat: number; lng: number }) => `${p.lat.toFixed(6)},${p.lng.toFixed(6)}`;
+function pointValue(p: UrlPoint): string {
+  return p.query.trim() || `${p.lat.toFixed(6)},${p.lng.toFixed(6)}`;
+}
+function buildMapsUrl(pts: UrlPoint[]): string {
   if (pts.length === 0) return '';
   if (pts.length === 1) {
-    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fmt(pts[0]))}`;
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(pointValue(pts[0]))}`;
   }
   const origin = pts[0];
   const destination = pts[pts.length - 1];
@@ -42,8 +47,13 @@ function buildMapsUrl(pts: { lat: number; lng: number }[]): string {
     const step = (middle.length - 1) / (MAX_WAYPOINTS - 1);
     middle = Array.from({ length: MAX_WAYPOINTS }, (_, i) => middle[Math.round(i * step)]);
   }
-  const params = new URLSearchParams({ api: '1', origin: fmt(origin), destination: fmt(destination) });
-  if (middle.length) params.set('waypoints', middle.map(fmt).join('|'));
+  const params = new URLSearchParams({
+    api: '1',
+    origin: pointValue(origin),
+    destination: pointValue(destination),
+    travelmode: 'walking',
+  });
+  if (middle.length) params.set('waypoints', middle.map(pointValue).join('|'));
   return `https://www.google.com/maps/dir/?${params.toString()}`;
 }
 
@@ -61,7 +71,7 @@ export default function MapView({ items, startHotel, endHotel }: Props) {
   // share the same location — multi-stop stations like "08:15 Hankyu" and
   // "07:45 Walk arrives Kawaramachi" would otherwise stack on top of each other.
   const points = useMemo(() => {
-    type Pt = { lat: number; lng: number; label: string; titles: string[]; kind: 'hotel' | 'item' };
+    type Pt = { lat: number; lng: number; label: string; titles: string[]; kind: 'hotel' | 'item'; query: string };
     const raw: Pt[] = [];
     const push = (p: Pt) => {
       const COORD_EPS = 1e-4; // ~10m
@@ -78,18 +88,19 @@ export default function MapView({ items, startHotel, endHotel }: Props) {
       raw.push(p);
     };
 
+    const withCity = (name: string, city: string) => (city ? `${name}, ${city}` : name);
     if (startHotel && startHotel.lat && startHotel.lng) {
-      push({ lat: startHotel.lat, lng: startHotel.lng, label: '🏨', titles: [`Start: ${startHotel.name}`], kind: 'hotel' });
+      push({ lat: startHotel.lat, lng: startHotel.lng, label: '🏨', titles: [`Start: ${startHotel.name}`], kind: 'hotel', query: withCity(startHotel.name, startHotel.city) });
     }
     for (const item of items) {
       const r = resolveScheduleItem(item, data);
       if (r.lat && r.lng) {
         const t = (item.time_start || '').padStart(5, '0');
-        push({ lat: r.lat, lng: r.lng, label: t || '•', titles: [`${item.time_start ? item.time_start + ' · ' : ''}${item.activity}`], kind: 'item' });
+        push({ lat: r.lat, lng: r.lng, label: t || '•', titles: [`${item.time_start ? item.time_start + ' · ' : ''}${item.activity}`], kind: 'item', query: withCity(r.location_name || item.activity, r.city) });
       }
     }
     if (endHotel && endHotel.lat && endHotel.lng) {
-      push({ lat: endHotel.lat, lng: endHotel.lng, label: '🏨', titles: [`End: ${endHotel.name}`], kind: 'hotel' });
+      push({ lat: endHotel.lat, lng: endHotel.lng, label: '🏨', titles: [`End: ${endHotel.name}`], kind: 'hotel', query: withCity(endHotel.name, endHotel.city) });
     }
     return raw;
   }, [items, startHotel, endHotel, data]);
@@ -114,7 +125,10 @@ export default function MapView({ items, startHotel, endHotel }: Props) {
   };
 
   const path = useMemo(() => points.map((p) => ({ lat: p.lat, lng: p.lng })), [points]);
-  const mapsUrl = useMemo(() => buildMapsUrl(path), [path]);
+  const mapsUrl = useMemo(
+    () => buildMapsUrl(points.map((p) => ({ lat: p.lat, lng: p.lng, query: p.query }))),
+    [points]
+  );
 
   if (!apiKey) {
     return (
