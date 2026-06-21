@@ -10,8 +10,10 @@ export default function Attractions() {
 
   if (!data) return null;
 
-  // Stations are entities used for routing/maps, not sights to browse.
-  const browsable = data.attractions.filter((a) => a.category !== 'station');
+  // Stations and service points (e.g. a hotel front desk) are entities used for
+  // routing/maps, not sights to browse.
+  const HIDDEN = new Set(['station', 'service']);
+  const browsable = data.attractions.filter((a) => !HIDDEN.has(a.category));
   const cities = [...new Set(browsable.map((a) => a.city))].filter(Boolean);
   const categories = [...new Set(browsable.map((a) => a.category))].filter(Boolean);
 
