@@ -551,13 +551,21 @@ function SourceButton({ icon, label, onClick }: { icon: string; label: string; o
 function Lightbox({ bookmark, onClose, onEdit, onDelete }: { bookmark: LocalBookmark; onClose: () => void; onEdit: () => void; onDelete: () => void }) {
   return (
     <div className="fixed inset-0 bg-black/90 z-[60] flex flex-col" onClick={onClose}>
-      <div className="flex-1 flex items-center justify-center p-4 min-h-0" onClick={onClose}>
-        {/* Bound by vmin so a 90°/270° rotation always stays within the viewport. */}
+      <div className="flex-1 flex items-center justify-center p-4 min-h-0 overflow-hidden" onClick={onClose}>
+        {/* Normally bound by the container (max-w/h-full) so the whole image is
+            visible. When rotated 90/270 the bounding box swaps, so fall back to
+            swapped viewport bounds to keep it on screen. */}
         <img
           src={bookmark.localPreview || bookmark.image_url}
           alt={bookmark.caption || ''}
-          className="max-w-[90vmin] max-h-[90vmin] object-contain transition-transform"
-          style={bookmark.rotation ? { transform: `rotate(${bookmark.rotation}deg)` } : undefined}
+          className="object-contain transition-transform max-w-full max-h-full"
+          style={
+            bookmark.rotation === 90 || bookmark.rotation === 270
+              ? { transform: `rotate(${bookmark.rotation}deg)`, maxWidth: '90vh', maxHeight: '90vw' }
+              : bookmark.rotation
+              ? { transform: `rotate(${bookmark.rotation}deg)` }
+              : undefined
+          }
           onClick={(e) => e.stopPropagation()}
         />
       </div>
