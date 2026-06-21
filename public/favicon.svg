@@ -1,73 +1,74 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" fill="none">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#1e293b"/>
-      <stop offset="1" stop-color="#0f172a"/>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#dcefff"/>
+      <stop offset="0.55" stop-color="#eaf6ff"/>
+      <stop offset="1" stop-color="#fdeef6"/>
     </linearGradient>
     <linearGradient id="trunk" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#5b4636"/>
-      <stop offset="1" stop-color="#7c5a42"/>
+      <stop offset="0" stop-color="#6b4a34"/>
+      <stop offset="1" stop-color="#8a6244"/>
     </linearGradient>
-    <radialGradient id="bloom" cx="0.5" cy="0.4" r="0.7">
-      <stop offset="0" stop-color="#fce7f3"/>
-      <stop offset="0.55" stop-color="#f9a8d4"/>
-      <stop offset="1" stop-color="#f472b6"/>
+    <radialGradient id="bloom" cx="0.5" cy="0.38" r="0.72">
+      <stop offset="0" stop-color="#fde0ef"/>
+      <stop offset="0.5" stop-color="#f9a8d4"/>
+      <stop offset="1" stop-color="#ec4899"/>
     </radialGradient>
   </defs>
 
-  <!-- background -->
-  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <!-- light sky background -->
+  <rect width="512" height="512" rx="112" fill="url(#sky)"/>
 
   <!-- ground shadow -->
-  <ellipse cx="256" cy="436" rx="150" ry="16" fill="#000000" opacity="0.18"/>
+  <ellipse cx="256" cy="438" rx="150" ry="15" fill="#0f172a" opacity="0.10"/>
 
   <!-- trunk + branches -->
   <g stroke="url(#trunk)" stroke-linecap="round" fill="none">
-    <path d="M256 432 C 252 360, 250 320, 256 286" stroke-width="26"/>
-    <path d="M256 320 C 230 300, 206 286, 178 250" stroke-width="16"/>
-    <path d="M256 332 C 286 312, 312 300, 342 262" stroke-width="16"/>
-    <path d="M254 300 C 244 280, 232 268, 214 250" stroke-width="11"/>
-    <path d="M258 300 C 270 282, 286 272, 304 254" stroke-width="11"/>
+    <path d="M256 436 C 252 362, 250 322, 256 286" stroke-width="28"/>
+    <path d="M256 322 C 228 300, 204 286, 174 248" stroke-width="17"/>
+    <path d="M256 334 C 288 312, 314 300, 346 260" stroke-width="17"/>
+    <path d="M254 300 C 244 280, 230 266, 210 248" stroke-width="12"/>
+    <path d="M258 300 C 272 282, 288 270, 308 252" stroke-width="12"/>
   </g>
 
-  <!-- blossom canopy: soft clusters -->
+  <!-- blossom canopy -->
   <g fill="url(#bloom)">
-    <circle cx="256" cy="190" r="70"/>
-    <circle cx="180" cy="220" r="54"/>
-    <circle cx="332" cy="218" r="54"/>
-    <circle cx="210" cy="158" r="44"/>
-    <circle cx="304" cy="156" r="44"/>
-    <circle cx="150" cy="186" r="34"/>
-    <circle cx="362" cy="184" r="34"/>
+    <circle cx="256" cy="186" r="76"/>
+    <circle cx="172" cy="220" r="58"/>
+    <circle cx="340" cy="218" r="58"/>
+    <circle cx="206" cy="150" r="48"/>
+    <circle cx="308" cy="148" r="48"/>
+    <circle cx="140" cy="184" r="36"/>
+    <circle cx="372" cy="182" r="36"/>
   </g>
 
-  <!-- a few 5-petal blossoms as detail -->
-  <g fill="#ffffff" opacity="0.95">
+  <!-- white 5-petal blossoms for detail -->
+  <g fill="#ffffff">
     <g id="flower">
-      <circle cx="256" cy="163" r="8"/>
-      <circle cx="268" cy="172" r="8"/>
-      <circle cx="264" cy="187" r="8"/>
-      <circle cx="248" cy="187" r="8"/>
-      <circle cx="244" cy="172" r="8"/>
+      <circle cx="256" cy="160" r="9"/>
+      <circle cx="269" cy="170" r="9"/>
+      <circle cx="264" cy="186" r="9"/>
+      <circle cx="248" cy="186" r="9"/>
+      <circle cx="243" cy="170" r="9"/>
     </g>
-    <g transform="translate(186 214) scale(0.8) translate(-256 -176)">
-      <circle cx="256" cy="163" r="8"/><circle cx="268" cy="172" r="8"/><circle cx="264" cy="187" r="8"/><circle cx="248" cy="187" r="8"/><circle cx="244" cy="172" r="8"/>
+    <g transform="translate(176 216) scale(0.78) translate(-256 -174)">
+      <circle cx="256" cy="160" r="9"/><circle cx="269" cy="170" r="9"/><circle cx="264" cy="186" r="9"/><circle cx="248" cy="186" r="9"/><circle cx="243" cy="170" r="9"/>
     </g>
-    <g transform="translate(330 210) scale(0.8) translate(-256 -176)">
-      <circle cx="256" cy="163" r="8"/><circle cx="268" cy="172" r="8"/><circle cx="264" cy="187" r="8"/><circle cx="248" cy="187" r="8"/><circle cx="244" cy="172" r="8"/>
+    <g transform="translate(338 214) scale(0.78) translate(-256 -174)">
+      <circle cx="256" cy="160" r="9"/><circle cx="269" cy="170" r="9"/><circle cx="264" cy="186" r="9"/><circle cx="248" cy="186" r="9"/><circle cx="243" cy="170" r="9"/>
     </g>
   </g>
-  <g fill="#f472b6">
-    <circle cx="256" cy="176" r="5.5"/>
-    <circle cx="186" cy="214" r="4.5"/>
-    <circle cx="330" cy="210" r="4.5"/>
+  <g fill="#ec4899">
+    <circle cx="256" cy="173" r="6"/>
+    <circle cx="176" cy="216" r="5"/>
+    <circle cx="338" cy="214" r="5"/>
   </g>
 
   <!-- falling petals -->
-  <g fill="#f9a8d4">
-    <ellipse cx="150" cy="300" rx="9" ry="6" transform="rotate(35 150 300)"/>
-    <ellipse cx="372" cy="312" rx="9" ry="6" transform="rotate(-30 372 312)"/>
-    <ellipse cx="320" cy="356" rx="8" ry="5" transform="rotate(20 320 356)"/>
-    <ellipse cx="196" cy="356" rx="8" ry="5" transform="rotate(-20 196 356)"/>
+  <g fill="#f472b6">
+    <ellipse cx="142" cy="302" rx="9" ry="6" transform="rotate(35 142 302)"/>
+    <ellipse cx="378" cy="312" rx="9" ry="6" transform="rotate(-30 378 312)"/>
+    <ellipse cx="322" cy="360" rx="8" ry="5" transform="rotate(20 322 360)"/>
+    <ellipse cx="192" cy="360" rx="8" ry="5" transform="rotate(-20 192 360)"/>
   </g>
 </svg>
