@@ -24,6 +24,29 @@ interface Props {
   endHotel?: Hotel | null;
 }
 
+// Build a Google Maps directions URL that draws all the day's stops in order
+// (markers + route line). Opens the Maps app on mobile, the website on desktop.
+// The Maps URLs API allows ~9 waypoints between origin and destination; if a
+// day has more mapped stops, sample the middle ones evenly to keep the shape.
+const MAX_WAYPOINTS = 9;
+function buildMapsUrl(pts: { lat: number; lng: number }[]): string {
+  const fmt = (p: { lat: number; lng: number }) => `${p.lat.toFixed(6)},${p.lng.toFixed(6)}`;
+  if (pts.length === 0) return '';
+  if (pts.length === 1) {
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fmt(pts[0]))}`;
+  }
+  const origin = pts[0];
+  const destination = pts[pts.length - 1];
+  let middle = pts.slice(1, -1);
+  if (middle.length > MAX_WAYPOINTS) {
+    const step = (middle.length - 1) / (MAX_WAYPOINTS - 1);
+    middle = Array.from({ length: MAX_WAYPOINTS }, (_, i) => middle[Math.round(i * step)]);
+  }
+  const params = new URLSearchParams({ api: '1', origin: fmt(origin), destination: fmt(destination) });
+  if (middle.length) params.set('waypoints', middle.map(fmt).join('|'));
+  return `https://www.google.com/maps/dir/?${params.toString()}`;
+}
+
 export default function MapView({ items, startHotel, endHotel }: Props) {
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string;
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
@@ -91,6 +114,7 @@ export default function MapView({ items, startHotel, endHotel }: Props) {
   };
 
   const path = useMemo(() => points.map((p) => ({ lat: p.lat, lng: p.lng })), [points]);
+  const mapsUrl = useMemo(() => buildMapsUrl(path), [path]);
 
   if (!apiKey) {
     return (
@@ -105,7 +129,18 @@ export default function MapView({ items, startHotel, endHotel }: Props) {
   }
 
   return (
-    <div className="swiper-no-swiping">
+    <div className="swiper-no-swiping relative">
+      {mapsUrl && (
+        <a
+          href={mapsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Open the full day route in Google Maps"
+          className="absolute top-2 right-2 z-10 flex items-center gap-1 bg-surface/90 backdrop-blur border border-surface-light rounded-full px-3 py-1.5 text-xs font-medium text-text shadow active:scale-95 transition-transform"
+        >
+          🗺️ Open in Maps
+        </a>
+      )}
       <GoogleMap
         mapContainerStyle={mapContainerStyle}
         center={center}
