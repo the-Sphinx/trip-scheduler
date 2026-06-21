@@ -1,4 +1,5 @@
 import type { Hotel } from '../types';
+import ImageGallery from './ImageGallery';
 
 export default function HotelCard({ hotel, compact }: { hotel: Hotel; compact?: boolean }) {
   const showThumb = !!hotel.photo_url;
@@ -64,6 +65,8 @@ export default function HotelCard({ hotel, compact }: { hotel: Hotel; compact?: 
           loading="lazy"
         />
       )}
+
+      {hotel.images?.length > 0 && <ImageGallery images={hotel.images} label="Reservation" />}
     </div>
   );
 }

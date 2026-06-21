@@ -8,6 +8,7 @@ export interface ResolvedScheduleItem {
   photo_url: string;
   website: string;
   notes: string;
+  images: string[]; // reservation/booking document images (Drive URLs)
 }
 
 const EMPTY: ResolvedScheduleItem = {
@@ -18,6 +19,7 @@ const EMPTY: ResolvedScheduleItem = {
   photo_url: '',
   website: '',
   notes: '',
+  images: [],
 };
 
 /**
@@ -31,15 +33,21 @@ export function resolveScheduleItem(item: ScheduleItem, data: TripData | null): 
 
   if (item.ref_type === 'attraction') {
     const a = data.attractions.find((x) => matchName(x.name));
-    if (a) return { location_name: a.name, address: a.address, lat: a.lat, lng: a.lng, photo_url: a.photo_url, website: a.website, notes: a.notes };
+    if (a) return { ...EMPTY, location_name: a.name, address: a.address, lat: a.lat, lng: a.lng, photo_url: a.photo_url, website: a.website, notes: a.notes };
   }
   if (item.ref_type === 'hotel') {
     const h = data.hotels.find((x) => matchName(x.name));
-    if (h) return { location_name: h.name, address: h.address, lat: h.lat, lng: h.lng, photo_url: h.photo_url, website: h.website, notes: h.notes };
+    if (h) return { ...EMPTY, location_name: h.name, address: h.address, lat: h.lat, lng: h.lng, photo_url: h.photo_url, website: h.website, notes: h.notes, images: h.images ?? [] };
   }
   if (item.ref_type === 'restaurant') {
     const r = data.restaurants.find((x) => matchName(x.name));
-    if (r) return { location_name: r.name, address: r.address, lat: r.lat, lng: r.lng, photo_url: r.photo_url, website: r.website, notes: r.notes };
+    if (r) return { ...EMPTY, location_name: r.name, address: r.address, lat: r.lat, lng: r.lng, photo_url: r.photo_url, website: r.website, notes: r.notes };
+  }
+  if (item.ref_type === 'transport') {
+    // Match by the transport's `name` column, else by "from -> to" phrasing.
+    const t = data.transport.find((x) => matchName(x.name))
+      || data.transport.find((x) => `${x.from_city} -> ${x.to_city}`.toLowerCase() === key);
+    if (t) return { ...EMPTY, location_name: t.name || `${t.from_city} → ${t.to_city}`, notes: t.notes, images: t.images ?? [] };
   }
   return EMPTY;
 }

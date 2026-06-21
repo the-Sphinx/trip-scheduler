@@ -14,6 +14,10 @@ dist-ssr
 .env
 credentials.json
 
+# Scratch folder for source images before they're uploaded to Drive.
+# Never commit — may contain personal reservation/booking documents.
+temp/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

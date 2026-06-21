@@ -1,4 +1,5 @@
 import type { Transport } from '../types';
+import ImageGallery from './ImageGallery';
 
 const typeIcons: Record<string, string> = {
   flight: '✈️',
@@ -50,6 +51,8 @@ export default function TransportCard({ transport }: { transport: Transport }) {
       {transport.notes && (
         <p className="text-xs text-text-muted mt-2">{transport.notes}</p>
       )}
+
+      {transport.images?.length > 0 && <ImageGallery images={transport.images} label="Booking docs" />}
     </div>
   );
 }
