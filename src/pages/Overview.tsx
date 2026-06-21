@@ -4,7 +4,9 @@ import { useTripData } from '../context/TripDataContext';
 import { resolveScheduleItem } from '../services/resolve';
 import TripWeatherStrip from '../components/TripWeatherStrip';
 import DayMapViewer from '../components/DayMapViewer';
+import SearchOverlay from '../components/SearchOverlay';
 import { dayMaps, dayMapUrl } from '../data/dayMaps';
+import { todayLocal } from '../utils/date';
 
 const transportIcons: Record<string, string> = {
   flight: '✈️',
@@ -17,9 +19,10 @@ const transportIcons: Record<string, string> = {
 export default function Overview() {
   const { data, days } = useTripData();
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
+  const [searchOpen, setSearchOpen] = useState(false);
   if (!data) return null;
 
-  const today = new Date().toISOString().split('T')[0];
+  const today = todayLocal();
   const now = new Date();
 
   // Find today's schedule + current/next item
@@ -51,7 +54,15 @@ export default function Overview() {
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-1">Japan Trip 2026</h1>
-      <p className="text-text-muted text-sm mb-4">Jun 25 – Jul 5 • 4 travelers</p>
+      <p className="text-text-muted text-sm mb-3">Jun 25 – Jul 5 • 4 travelers</p>
+
+      {/* Search */}
+      <button
+        onClick={() => setSearchOpen(true)}
+        className="flex items-center gap-2 w-full bg-surface rounded-xl px-3 py-2.5 mb-4 text-text-muted text-sm active:scale-[0.99] transition-transform"
+      >
+        🔍 <span>Search attractions, food, hotels, days…</span>
+      </button>
 
       {/* Now / Today card */}
       <NowCard
@@ -161,6 +172,7 @@ export default function Overview() {
       {viewerIndex !== null && (
         <DayMapViewer startIndex={viewerIndex} onClose={() => setViewerIndex(null)} />
       )}
+      {searchOpen && <SearchOverlay onClose={() => setSearchOpen(false)} />}
     </div>
   );
 }

@@ -12,6 +12,7 @@ import WeatherWidget from '../components/WeatherWidget';
 import HotelCard from '../components/HotelCard';
 import DayMapViewer from '../components/DayMapViewer';
 import { getDayMap, getDayMapIndex, dayMapUrl } from '../data/dayMaps';
+import { todayLocal } from '../utils/date';
 
 export default function DailySchedule() {
   const { days, data } = useTripData();
@@ -30,8 +31,7 @@ export default function DailySchedule() {
     let idx = -1;
     if (dateParam) idx = days.findIndex((d) => d.date === dateParam);
     if (idx < 0) {
-      const today = new Date().toISOString().split('T')[0];
-      idx = days.findIndex((d) => d.date === today);
+      idx = days.findIndex((d) => d.date === todayLocal());
     }
     if (idx < 0) idx = 0;
     setActiveDay(idx);
