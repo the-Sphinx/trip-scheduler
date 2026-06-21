@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Zoom, Keyboard } from 'swiper/modules';
 import 'swiper/css';
@@ -34,7 +35,11 @@ export default function ImageGallery({ images, label = 'Documents' }: { images: 
 
 function Viewer({ images, startIndex, label, onClose }: { images: string[]; startIndex: number; label: string; onClose: () => void }) {
   const [active, setActive] = useState(startIndex);
-  return (
+  // Portal to <body>: this gallery is rendered inside Swiper slides (day pages),
+  // whose .swiper-wrapper has a CSS transform. A position:fixed element inside a
+  // transformed ancestor is offset by that transform, so without the portal the
+  // overlay lands on the previously-active day's slide.
+  return createPortal(
     <div className="fixed inset-0 z-[70] bg-black flex flex-col" onClick={(e) => e.stopPropagation()}>
       <div className="flex items-center justify-between px-4 py-3 text-white bg-black/60">
         <span className="text-sm font-medium">{label}</span>
@@ -59,6 +64,7 @@ function Viewer({ images, startIndex, label, onClose }: { images: string[]; star
         ))}
       </Swiper>
       <p className="text-center text-white/50 text-xs py-2 bg-black/60">Pinch or double-tap to zoom · swipe to change</p>
-    </div>
+    </div>,
+    document.body
   );
 }
