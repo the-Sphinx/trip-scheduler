@@ -38,9 +38,11 @@ export interface Hotel {
   price_currency: string;
   room_type: string;
   photo_url: string;
+  images: string[]; // reservation document images (Drive URLs)
 }
 
 export interface Transport {
+  name: string;
   type: 'flight' | 'train' | 'bus' | 'ferry';
   from_city: string;
   to_city: string;
@@ -54,6 +56,7 @@ export interface Transport {
   notes: string;
   price: string;
   price_currency: string;
+  images: string[]; // booking document images (Drive URLs)
 }
 
 export interface Attraction {

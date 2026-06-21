@@ -36,6 +36,14 @@ function num(val: string): number {
   return isNaN(n) ? 0 : n;
 }
 
+// Parse a pipe-separated list of image URLs from an `images` cell.
+function imageList(row: string[], headers: string[]): string[] {
+  return col(row, headers, 'images')
+    .split('|')
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
 function parseOverview(row: string[], headers: string[]): CityStop {
   return {
     city: col(row, headers, 'city'),
@@ -77,11 +85,13 @@ function parseHotel(row: string[], headers: string[]): Hotel {
     price_currency: col(row, headers, 'price_currency'),
     room_type: col(row, headers, 'room_type'),
     photo_url: col(row, headers, 'photo_url'),
+    images: imageList(row, headers),
   };
 }
 
 function parseTransport(row: string[], headers: string[]): Transport {
   return {
+    name: col(row, headers, 'name'),
     type: col(row, headers, 'type') as Transport['type'],
     from_city: col(row, headers, 'from_city'),
     to_city: col(row, headers, 'to_city'),
@@ -95,6 +105,7 @@ function parseTransport(row: string[], headers: string[]): Transport {
     notes: col(row, headers, 'notes'),
     price: col(row, headers, 'price'),
     price_currency: col(row, headers, 'price_currency'),
+    images: imageList(row, headers),
   };
 }
 
@@ -179,8 +190,10 @@ function normalize(d: Partial<TripData> | null): TripData {
   return {
     overview: d?.overview ?? [],
     schedule: d?.schedule ?? [],
-    hotels: d?.hotels ?? [],
-    transport: d?.transport ?? [],
+    // Backfill nested `images` too: rows cached before that field existed lack
+    // it, and consumers map over it.
+    hotels: (d?.hotels ?? []).map((h) => ({ ...h, images: h.images ?? [] })),
+    transport: (d?.transport ?? []).map((t) => ({ ...t, images: t.images ?? [] })),
     attractions: d?.attractions ?? [],
     restaurants: d?.restaurants ?? [],
     shopping: d?.shopping ?? [],

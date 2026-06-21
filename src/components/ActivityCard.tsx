@@ -4,6 +4,7 @@ import type { ScheduleItem } from '../types';
 import { useTripData } from '../context/TripDataContext';
 import { resolveScheduleItem } from '../services/resolve';
 import { hasGuide } from '../content/attractions';
+import ImageGallery from './ImageGallery';
 
 const categoryColors: Record<string, string> = {
   sightseeing: 'bg-blue-500/20 text-blue-400',
@@ -76,6 +77,11 @@ export default function ActivityCard({ item }: { item: ScheduleItem }) {
                 <p className={`text-blue-200 text-xs italic ${expanded ? '' : 'line-clamp-2'}`}>{resolved.notes}</p>
               )}
             </div>
+          )}
+
+          {/* Reservation / booking document images for linked hotel/transport */}
+          {expanded && resolved.images.length > 0 && (
+            <ImageGallery images={resolved.images} label={item.ref_type === 'transport' ? 'Booking docs' : 'Reservation'} />
           )}
 
           {/* Extra info appears below the notes when expanded — same text-xs as notes */}
