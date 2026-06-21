@@ -86,6 +86,7 @@ function parseHotel(row: string[], headers: string[]): Hotel {
     room_type: col(row, headers, 'room_type'),
     photo_url: col(row, headers, 'photo_url'),
     images: imageList(row, headers),
+    place_id: col(row, headers, 'place_id'),
   };
 }
 
@@ -123,6 +124,7 @@ function parseAttraction(row: string[], headers: string[]): Attraction {
     lng: num(col(row, headers, 'lng')),
     photo_url: col(row, headers, 'photo_url'),
     slug: col(row, headers, 'slug'),
+    place_id: col(row, headers, 'place_id'),
   };
 }
 
@@ -180,6 +182,7 @@ function parseRestaurant(row: string[], headers: string[]): Restaurant {
     lat: num(col(row, headers, 'lat')),
     lng: num(col(row, headers, 'lng')),
     photo_url: col(row, headers, 'photo_url'),
+    place_id: col(row, headers, 'place_id'),
   };
 }
 
