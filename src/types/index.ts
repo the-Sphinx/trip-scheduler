@@ -74,6 +74,7 @@ export interface Attraction {
   photo_url: string;
   slug: string;
   place_id: string; // Google Maps place ID (exact named pin for the route)
+  images: string[]; // related document images (Drive URLs); e.g. a front-desk map
 }
 
 export interface Restaurant {

@@ -125,6 +125,7 @@ function parseAttraction(row: string[], headers: string[]): Attraction {
     photo_url: col(row, headers, 'photo_url'),
     slug: col(row, headers, 'slug'),
     place_id: col(row, headers, 'place_id'),
+    images: imageList(row, headers),
   };
 }
 
@@ -197,7 +198,7 @@ function normalize(d: Partial<TripData> | null): TripData {
     // it, and consumers map over it.
     hotels: (d?.hotels ?? []).map((h) => ({ ...h, images: h.images ?? [] })),
     transport: (d?.transport ?? []).map((t) => ({ ...t, images: t.images ?? [] })),
-    attractions: d?.attractions ?? [],
+    attractions: (d?.attractions ?? []).map((a) => ({ ...a, images: a.images ?? [] })),
     restaurants: d?.restaurants ?? [],
     shopping: d?.shopping ?? [],
     bookmarks: d?.bookmarks ?? [],
