@@ -2,6 +2,7 @@ import type { ScheduleItem, TripData } from '../types';
 
 export interface ResolvedScheduleItem {
   location_name: string;
+  city: string;
   address: string;
   lat: number;
   lng: number;
@@ -13,6 +14,7 @@ export interface ResolvedScheduleItem {
 
 const EMPTY: ResolvedScheduleItem = {
   location_name: '',
+  city: '',
   address: '',
   lat: 0,
   lng: 0,
@@ -33,15 +35,15 @@ export function resolveScheduleItem(item: ScheduleItem, data: TripData | null): 
 
   if (item.ref_type === 'attraction') {
     const a = data.attractions.find((x) => matchName(x.name));
-    if (a) return { ...EMPTY, location_name: a.name, address: a.address, lat: a.lat, lng: a.lng, photo_url: a.photo_url, website: a.website, notes: a.notes };
+    if (a) return { ...EMPTY, location_name: a.name, city: a.city, address: a.address, lat: a.lat, lng: a.lng, photo_url: a.photo_url, website: a.website, notes: a.notes };
   }
   if (item.ref_type === 'hotel') {
     const h = data.hotels.find((x) => matchName(x.name));
-    if (h) return { ...EMPTY, location_name: h.name, address: h.address, lat: h.lat, lng: h.lng, photo_url: h.photo_url, website: h.website, notes: h.notes, images: h.images ?? [] };
+    if (h) return { ...EMPTY, location_name: h.name, city: h.city, address: h.address, lat: h.lat, lng: h.lng, photo_url: h.photo_url, website: h.website, notes: h.notes, images: h.images ?? [] };
   }
   if (item.ref_type === 'restaurant') {
     const r = data.restaurants.find((x) => matchName(x.name));
-    if (r) return { ...EMPTY, location_name: r.name, address: r.address, lat: r.lat, lng: r.lng, photo_url: r.photo_url, website: r.website, notes: r.notes };
+    if (r) return { ...EMPTY, location_name: r.name, city: r.city, address: r.address, lat: r.lat, lng: r.lng, photo_url: r.photo_url, website: r.website, notes: r.notes };
   }
   if (item.ref_type === 'transport') {
     // Match by the transport's `name` column, else by "from -> to" phrasing.
