@@ -39,6 +39,7 @@ export interface Hotel {
   room_type: string;
   photo_url: string;
   images: string[]; // reservation document images (Drive URLs)
+  place_id: string; // Google Maps place ID (exact named pin for the route)
 }
 
 export interface Transport {
@@ -72,6 +73,7 @@ export interface Attraction {
   lng: number;
   photo_url: string;
   slug: string;
+  place_id: string; // Google Maps place ID (exact named pin for the route)
 }
 
 export interface Restaurant {
@@ -90,6 +92,7 @@ export interface Restaurant {
   lat: number;
   lng: number;
   photo_url: string;
+  place_id: string; // Google Maps place ID (exact named pin for the route)
 }
 
 export interface ShoppingItem {

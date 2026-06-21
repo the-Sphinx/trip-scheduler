@@ -26,19 +26,25 @@ interface Props {
 
 // Build a Google Maps directions URL that draws all the day's stops in order
 // (markers + route line). Opens the Maps app on mobile, the website on desktop.
-// We pass each stop's NAME (so the Maps side panel shows readable place names
-// instead of reverse-geocoded addresses), falling back to coordinates when a
-// stop has no name. The Maps URLs API allows ~9 waypoints between origin and
-// destination; if a day has more mapped stops, sample the middle ones evenly.
-type UrlPoint = { lat: number; lng: number; query: string };
+//
+// Each stop pins to its exact Google PLACE (place ID) when we have one — the
+// side panel then shows the place NAME rather than a reverse-geocoded address —
+// and falls back to the raw COORDINATE otherwise. Place IDs are fixed, curated
+// references (verified to sit on our coordinates), not live name searches.
+// The Maps URLs API allows ~9 waypoints; if a day has more mapped stops, sample
+// the middle ones evenly to keep the route shape.
+type UrlPoint = { lat: number; lng: number; name: string; placeId: string };
 const MAX_WAYPOINTS = 9;
-function pointValue(p: UrlPoint): string {
-  return p.query.trim() || `${p.lat.toFixed(6)},${p.lng.toFixed(6)}`;
-}
+const coord = (p: UrlPoint) => `${p.lat.toFixed(6)},${p.lng.toFixed(6)}`;
+// Value Maps shows for a stop: its name when we have a place ID, else the coord.
+const pointValue = (p: UrlPoint) => (p.placeId ? p.name || coord(p) : coord(p));
 function buildMapsUrl(pts: UrlPoint[]): string {
   if (pts.length === 0) return '';
   if (pts.length === 1) {
-    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(pointValue(pts[0]))}`;
+    const p = pts[0];
+    const params = new URLSearchParams({ api: '1', query: pointValue(p) });
+    if (p.placeId) params.set('query_place_id', p.placeId);
+    return `https://www.google.com/maps/search/?${params.toString()}`;
   }
   const origin = pts[0];
   const destination = pts[pts.length - 1];
@@ -53,7 +59,15 @@ function buildMapsUrl(pts: UrlPoint[]): string {
     destination: pointValue(destination),
     travelmode: 'walking',
   });
-  if (middle.length) params.set('waypoints', middle.map(pointValue).join('|'));
+  if (origin.placeId) params.set('origin_place_id', origin.placeId);
+  if (destination.placeId) params.set('destination_place_id', destination.placeId);
+  if (middle.length) {
+    params.set('waypoints', middle.map(pointValue).join('|'));
+    // Parallel, positional list; empty slot = that waypoint uses its coordinate.
+    if (middle.some((p) => p.placeId)) {
+      params.set('waypoint_place_ids', middle.map((p) => p.placeId || '').join('|'));
+    }
+  }
   return `https://www.google.com/maps/dir/?${params.toString()}`;
 }
 
@@ -71,7 +85,7 @@ export default function MapView({ items, startHotel, endHotel }: Props) {
   // share the same location — multi-stop stations like "08:15 Hankyu" and
   // "07:45 Walk arrives Kawaramachi" would otherwise stack on top of each other.
   const points = useMemo(() => {
-    type Pt = { lat: number; lng: number; label: string; titles: string[]; kind: 'hotel' | 'item'; query: string };
+    type Pt = { lat: number; lng: number; label: string; titles: string[]; kind: 'hotel' | 'item'; name: string; placeId: string };
     const raw: Pt[] = [];
     const push = (p: Pt) => {
       const COORD_EPS = 1e-4; // ~10m
@@ -88,19 +102,18 @@ export default function MapView({ items, startHotel, endHotel }: Props) {
       raw.push(p);
     };
 
-    const withCity = (name: string, city: string) => (city ? `${name}, ${city}` : name);
     if (startHotel && startHotel.lat && startHotel.lng) {
-      push({ lat: startHotel.lat, lng: startHotel.lng, label: '🏨', titles: [`Start: ${startHotel.name}`], kind: 'hotel', query: withCity(startHotel.name, startHotel.city) });
+      push({ lat: startHotel.lat, lng: startHotel.lng, label: '🏨', titles: [`Start: ${startHotel.name}`], kind: 'hotel', name: startHotel.name, placeId: startHotel.place_id ?? '' });
     }
     for (const item of items) {
       const r = resolveScheduleItem(item, data);
       if (r.lat && r.lng) {
         const t = (item.time_start || '').padStart(5, '0');
-        push({ lat: r.lat, lng: r.lng, label: t || '•', titles: [`${item.time_start ? item.time_start + ' · ' : ''}${item.activity}`], kind: 'item', query: withCity(r.location_name || item.activity, r.city) });
+        push({ lat: r.lat, lng: r.lng, label: t || '•', titles: [`${item.time_start ? item.time_start + ' · ' : ''}${item.activity}`], kind: 'item', name: r.location_name || item.activity, placeId: r.place_id });
       }
     }
     if (endHotel && endHotel.lat && endHotel.lng) {
-      push({ lat: endHotel.lat, lng: endHotel.lng, label: '🏨', titles: [`End: ${endHotel.name}`], kind: 'hotel', query: withCity(endHotel.name, endHotel.city) });
+      push({ lat: endHotel.lat, lng: endHotel.lng, label: '🏨', titles: [`End: ${endHotel.name}`], kind: 'hotel', name: endHotel.name, placeId: endHotel.place_id ?? '' });
     }
     return raw;
   }, [items, startHotel, endHotel, data]);
@@ -126,7 +139,7 @@ export default function MapView({ items, startHotel, endHotel }: Props) {
 
   const path = useMemo(() => points.map((p) => ({ lat: p.lat, lng: p.lng })), [points]);
   const mapsUrl = useMemo(
-    () => buildMapsUrl(points.map((p) => ({ lat: p.lat, lng: p.lng, query: p.query }))),
+    () => buildMapsUrl(points.map((p) => ({ lat: p.lat, lng: p.lng, name: p.name, placeId: p.placeId }))),
     [points]
   );
 
