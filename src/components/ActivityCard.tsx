@@ -71,10 +71,10 @@ export default function ActivityCard({ item }: { item: ScheduleItem }) {
           {(item.notes || resolved.notes) && (
             <div className="mt-1 space-y-0.5">
               {item.notes && (
-                <p className={`text-blue-200 text-xs italic ${expanded ? '' : 'line-clamp-2'}`}>{item.notes}</p>
+                <p className={`text-blue-200 text-xs italic whitespace-pre-line ${expanded ? '' : 'line-clamp-2'}`}>{item.notes}</p>
               )}
               {resolved.notes && (
-                <p className={`text-blue-200 text-xs italic ${expanded ? '' : 'line-clamp-2'}`}>{resolved.notes}</p>
+                <p className={`text-blue-200 text-xs italic whitespace-pre-line ${expanded ? '' : 'line-clamp-2'}`}>{resolved.notes}</p>
               )}
             </div>
           )}
