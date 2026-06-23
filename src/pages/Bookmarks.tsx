@@ -85,6 +85,16 @@ export default function Bookmarks() {
     return [...counts.entries()].sort((a, b) => b[1] - a[1]);
   }, [items]);
 
+  // Category quick-pick options for the add/edit form: the 6 most-used labels,
+  // padded with presets so a fresh trip still shows sensible defaults.
+  const categoryOptions = useMemo(() => {
+    const merged = categories.map(([c]) => c);
+    for (const p of PRESET_CATEGORIES) {
+      if (!merged.some((c) => c.trim().toLowerCase() === p)) merged.push(p);
+    }
+    return merged.slice(0, 6);
+  }, [categories]);
+
   const sorted = useMemo(() => {
     const filtered = filter
       ? items.filter((b) => (b.category || '').trim().toLowerCase() === filter.toLowerCase())
@@ -222,7 +232,7 @@ export default function Bookmarks() {
 
       {/* Category filter chips */}
       {categories.length > 0 && (
-        <div className="flex gap-2 overflow-x-auto pb-2 mb-2 -mx-1 px-1 no-scrollbar">
+        <div className="flex flex-wrap gap-2 pb-2 mb-2">
           <FilterChip label="All" count={items.length} active={filter === ''} onClick={() => setFilter('')} />
           {categories.map(([c, n]) => (
             <FilterChip key={c} label={c} count={n} active={filter.toLowerCase() === c.toLowerCase()} style={categoryStyle(c)} onClick={() => setFilter(c)} />
@@ -271,6 +281,7 @@ export default function Bookmarks() {
 
       {adding && (
         <AddModal
+          categoryOptions={categoryOptions}
           onClose={() => setAdding(false)}
           onSubmitFile={(file, draft) => { setAdding(false); addFromFile(file, draft); }}
           onSubmitAppImage={(img, draft) => { setAdding(false); addFromAppImage(img, draft); }}
@@ -280,6 +291,7 @@ export default function Bookmarks() {
       {editing && (
         <EditModal
           bookmark={editing}
+          categoryOptions={categoryOptions}
           onClose={() => setEditing(null)}
           onSave={(draft) => { saveEdit(editing, draft); setEditing(null); }}
           onDelete={() => { setConfirmDelete(editing); setEditing(null); }}
@@ -337,10 +349,12 @@ function FilterChip({ label, count, active, style, onClick }: { label: string; c
 
 // ---------------- Add modal (image source + metadata) ----------------
 function AddModal({
+  categoryOptions,
   onClose,
   onSubmitFile,
   onSubmitAppImage,
 }: {
+  categoryOptions: string[];
   onClose: () => void;
   onSubmitFile: (file: File, draft: Draft) => void;
   onSubmitAppImage: (img: AppImage, draft: Draft) => void;
@@ -440,7 +454,7 @@ function AddModal({
         </div>
       )}
 
-      <MetaFields draft={draft} setDraft={setDraft} />
+      <MetaFields draft={draft} setDraft={setDraft} categoryOptions={categoryOptions} />
 
       <div className="flex justify-end gap-2 pt-4">
         <button onClick={onClose} className="px-3 py-1.5 text-sm text-text-muted">Cancel</button>
@@ -456,7 +470,7 @@ function AddModal({
   );
 }
 
-function EditModal({ bookmark, onClose, onSave, onDelete }: { bookmark: Bookmark; onClose: () => void; onSave: (d: Draft) => void; onDelete: () => void }) {
+function EditModal({ bookmark, categoryOptions, onClose, onSave, onDelete }: { bookmark: Bookmark; categoryOptions: string[]; onClose: () => void; onSave: (d: Draft) => void; onDelete: () => void }) {
   const [draft, setDraft] = useState<Draft>({ caption: bookmark.caption, category: bookmark.category, link: bookmark.link, rotation: bookmark.rotation || 0 });
   return (
     <Modal onClose={onClose}>
@@ -472,7 +486,7 @@ function EditModal({ bookmark, onClose, onSave, onDelete }: { bookmark: Bookmark
         </div>
         <button onClick={() => setDraft((d) => ({ ...d, rotation: (d.rotation + 90) % 360 }))} title="Rotate 90°" aria-label="Rotate" className="absolute top-2 left-2 bg-black/60 text-white rounded-full w-8 h-8 flex items-center justify-center">↻</button>
       </div>
-      <MetaFields draft={draft} setDraft={setDraft} />
+      <MetaFields draft={draft} setDraft={setDraft} categoryOptions={categoryOptions} />
       <div className="flex items-center justify-between pt-4">
         <button onClick={onDelete} className="text-red-300 text-sm px-3 py-1.5 rounded hover:bg-red-500/10">🗑️ Delete</button>
         <div className="flex gap-2">
@@ -484,8 +498,8 @@ function EditModal({ bookmark, onClose, onSave, onDelete }: { bookmark: Bookmark
   );
 }
 
-function MetaFields({ draft, setDraft }: { draft: Draft; setDraft: (d: Draft | ((p: Draft) => Draft)) => void }) {
-  const presetActive = PRESET_CATEGORIES.includes(draft.category.trim().toLowerCase());
+function MetaFields({ draft, setDraft, categoryOptions }: { draft: Draft; setDraft: (d: Draft | ((p: Draft) => Draft)) => void; categoryOptions: string[] }) {
+  const presetActive = categoryOptions.some((c) => c.trim().toLowerCase() === draft.category.trim().toLowerCase());
   return (
     <div className="space-y-3">
       <label className="block">
@@ -502,17 +516,20 @@ function MetaFields({ draft, setDraft }: { draft: Draft; setDraft: (d: Draft | (
       <div>
         <span className="text-[10px] uppercase tracking-wide text-text-muted">Category</span>
         <div className="flex flex-wrap gap-1.5 mt-1">
-          {PRESET_CATEGORIES.map((c) => (
-            <button
-              key={c}
-              onClick={() => setDraft((d) => ({ ...d, category: d.category.trim().toLowerCase() === c ? '' : c }))}
-              className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${
-                draft.category.trim().toLowerCase() === c ? categoryStyle(c) + ' ring-1 ring-white/30' : 'bg-surface text-text-muted border-surface-light'
-              }`}
-            >
-              {c}
-            </button>
-          ))}
+          {categoryOptions.map((c) => {
+            const active = draft.category.trim().toLowerCase() === c.trim().toLowerCase();
+            return (
+              <button
+                key={c}
+                onClick={() => setDraft((d) => ({ ...d, category: active ? '' : c }))}
+                className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${
+                  active ? categoryStyle(c) + ' ring-1 ring-white/30' : 'bg-surface text-text-muted border-surface-light'
+                }`}
+              >
+                {c}
+              </button>
+            );
+          })}
         </div>
         <input
           type="text"
