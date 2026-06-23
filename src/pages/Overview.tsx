@@ -56,6 +56,14 @@ export default function Overview() {
       <h1 className="text-2xl font-bold mb-1">Japan Trip 2026</h1>
       <p className="text-text-muted text-sm mb-3">Jun 25 – Jul 5 • 4 travelers</p>
 
+      {/* Trip participants */}
+      <img
+        src={`${import.meta.env.BASE_URL}participants.webp`}
+        alt="The Adventure Team: trip participants"
+        loading="lazy"
+        className="w-full rounded-xl mb-4 border border-surface-light"
+      />
+
       {/* Search */}
       <button
         onClick={() => setSearchOpen(true)}
