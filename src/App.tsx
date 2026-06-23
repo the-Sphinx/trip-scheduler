@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Routes, Route, NavLink, useLocation } from 'react-router-dom';
 import { useTripData } from './context/TripDataContext';
 import { refreshApp } from './services/sw-register';
@@ -26,6 +27,19 @@ function App() {
   const { loading, error, refresh } = useTripData();
   const location = useLocation();
   const onOverview = location.pathname === '/';
+  const [syncing, setSyncing] = useState(false);
+
+  async function handleRefresh() {
+    if (syncing) return;
+    setSyncing(true);
+    try {
+      // Keep the spinner up at least briefly so a fast cache hit still reads as
+      // a deliberate sync rather than a flicker.
+      await Promise.all([refresh(), refreshApp(), new Promise((r) => setTimeout(r, 600))]);
+    } finally {
+      setSyncing(false);
+    }
+  }
 
   if (loading) {
     return (
@@ -57,12 +71,16 @@ function App() {
       {/* Floating refresh button — Overview only */}
       {onOverview && (
         <button
-          onClick={() => { refresh(); refreshApp(); }}
+          onClick={handleRefresh}
+          disabled={syncing}
           title="Refresh data from Google Sheets"
-          aria-label="Refresh"
-          className="fixed top-3 right-3 z-50 bg-surface/90 backdrop-blur border border-surface-light rounded-full w-9 h-9 flex items-center justify-center text-text-muted hover:text-primary-light shadow"
+          aria-label={syncing ? 'Syncing…' : 'Refresh'}
+          aria-busy={syncing}
+          className={`fixed top-3 right-3 z-50 bg-surface/90 backdrop-blur border rounded-full w-9 h-9 flex items-center justify-center shadow transition-colors ${
+            syncing ? 'border-primary-light/50 text-primary-light' : 'border-surface-light text-text-muted hover:text-primary-light'
+          }`}
         >
-          ↻
+          <span className={`text-lg leading-none ${syncing ? 'animate-spin' : ''}`}>↻</span>
         </button>
       )}
 

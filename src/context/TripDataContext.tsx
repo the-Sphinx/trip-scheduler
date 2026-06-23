@@ -9,7 +9,7 @@ interface TripDataContextType {
   loading: boolean;
   error: string | null;
   days: DaySchedule[];
-  refresh: () => void;
+  refresh: () => Promise<void>;
 }
 
 const TripDataContext = createContext<TripDataContextType>({
@@ -17,7 +17,7 @@ const TripDataContext = createContext<TripDataContextType>({
   loading: true,
   error: null,
   days: [],
-  refresh: () => {},
+  refresh: async () => {},
 });
 
 export function useTripData() {
