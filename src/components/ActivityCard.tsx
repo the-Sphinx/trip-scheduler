@@ -14,6 +14,7 @@ const categoryColors: Record<string, string> = {
   rest: 'bg-green-500/20 text-green-400',
   entertainment: 'bg-yellow-500/20 text-yellow-400',
   workshop: 'bg-teal-500/20 text-teal-300',
+  museum: 'bg-indigo-500/20 text-indigo-300',
   other: 'bg-gray-500/20 text-gray-400',
 };
 
@@ -25,6 +26,7 @@ const categoryIcons: Record<string, string> = {
   rest: '😴',
   entertainment: '🎭',
   workshop: '🎨',
+  museum: '📚',
   other: '📌',
 };
 
