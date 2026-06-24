@@ -197,9 +197,27 @@ export default function DailySchedule() {
                   const prevR = prev ? resolveScheduleItem(prev, data) : null;
                   const r = resolveScheduleItem(item, data);
                   const leg = prevR ? estimateLeg(prevR, r) : null;
+                  // Day-opening leg: how to reach the first stop from last night's
+                  // hotel. Skipped when the first item is itself a transport step
+                  // (it already describes leaving the hotel).
+                  const startHotel = days[dayIdx - 1]?.hotel;
+                  const fromHotel =
+                    i === 0 && startHotel && startHotel.lat && startHotel.lng && item.category !== 'transport'
+                      ? estimateLeg({ lat: startHotel.lat, lng: startHotel.lng }, r)
+                      : null;
                   const itemId = `sched-${day.date}-${item.time_start}-${i}`;
                   return (
                     <div key={i} id={itemId} className="space-y-1 scroll-mt-20">
+                      {fromHotel && startHotel && (
+                        <div className="ml-4 flex items-center gap-1.5 text-[11px] text-text-muted/80 py-0.5">
+                          🏨
+                          {fromHotel.mode === 'walk' ? '🚶' : fromHotel.mode === 'transit' ? '🚆' : '🛤'}
+                          <span>
+                            ~{fromHotel.minutes} min {fromHotel.mode === 'walk' ? 'walk ' : ''}from {startHotel.name}
+                            {fromHotel.km < 10 ? ` (${fromHotel.km.toFixed(1)} km)` : ''}
+                          </span>
+                        </div>
+                      )}
                       {leg && (
                         <div className="ml-4 flex items-center gap-1.5 text-[11px] text-text-muted/80 py-0.5">
                           {leg.mode === 'walk' ? '🚶' : leg.mode === 'transit' ? '🚆' : '🛤'}

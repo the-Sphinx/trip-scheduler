@@ -13,7 +13,7 @@ export interface ScheduleItem {
   time_start: string;
   time_end: string;
   activity: string;
-  category: 'sightseeing' | 'food' | 'transport' | 'shopping' | 'rest' | 'entertainment' | 'other';
+  category: 'sightseeing' | 'food' | 'transport' | 'shopping' | 'rest' | 'entertainment' | 'workshop' | 'other';
   notes: string;
   // Reference to an entity in another tab. When set, the entity supplies
   // address / lat / lng / photo / website. Free items leave both empty.

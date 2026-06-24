@@ -13,6 +13,7 @@ const categoryColors: Record<string, string> = {
   shopping: 'bg-pink-500/20 text-pink-400',
   rest: 'bg-green-500/20 text-green-400',
   entertainment: 'bg-yellow-500/20 text-yellow-400',
+  workshop: 'bg-teal-500/20 text-teal-300',
   other: 'bg-gray-500/20 text-gray-400',
 };
 
@@ -23,6 +24,7 @@ const categoryIcons: Record<string, string> = {
   shopping: '🛍️',
   rest: '😴',
   entertainment: '🎭',
+  workshop: '🎨',
   other: '📌',
 };
 
