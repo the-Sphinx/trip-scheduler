@@ -79,6 +79,10 @@ export default function ActivityCard({ item }: { item: ScheduleItem }) {
   // but the destination's own item shows that photo right after — so don't
   // duplicate the image on the transport card.
   const thumb = item.category === 'transport' ? '' : resolved.photo_url;
+  // Booked-ticket PDF: absolute URL as-is, else a public/ path resolved against BASE_URL.
+  const ticketHref = resolved.ticket
+    ? (/^https?:\/\//.test(resolved.ticket) ? resolved.ticket : `${import.meta.env.BASE_URL}${resolved.ticket.replace(/^\//, '')}`)
+    : '';
 
   // Slug of the linked attraction's guide, if any — shown as a link in the
   // expanded view (clicking the card still just expands/collapses).
@@ -131,12 +135,23 @@ export default function ActivityCard({ item }: { item: ScheduleItem }) {
           )}
 
           {/* Extra info appears below the notes when expanded — same text-xs as notes */}
-          {expanded && (resolved.address || resolved.website || resolved.lat || guideSlug) && (
+          {expanded && (resolved.address || resolved.website || resolved.lat || guideSlug || ticketHref) && (
             <div className="mt-2 space-y-1">
               {resolved.address && (
                 <p className="text-text-muted text-xs">🗺️ {resolved.address}</p>
               )}
               <div className="flex flex-wrap gap-2 pt-0.5">
+                {ticketHref && (
+                  <a
+                    href={ticketHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs px-2 py-1 rounded-full bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 font-medium"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    🎟 Ticket
+                  </a>
+                )}
                 {guideSlug && (
                   <Link
                     to={`/attractions/${guideSlug}`}

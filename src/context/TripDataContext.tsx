@@ -91,6 +91,11 @@ export function TripDataProvider({ children }: { children: ReactNode }) {
         ...tripData.hotels.flatMap((h) => h.images ?? []),
         ...tripData.transport.flatMap((t) => t.images ?? []),
         ...tripData.bookmarks.map((b) => b.image_url),
+        // Booked-ticket PDFs — available offline at the gate (no signal needed).
+        ...tripData.attractions
+          .map((a) => a.ticket)
+          .filter(Boolean)
+          .map((t) => (/^https?:\/\//.test(t) ? t : `${import.meta.env.BASE_URL}${t.replace(/^\//, '')}`)),
       ]);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load trip data');
