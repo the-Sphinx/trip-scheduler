@@ -38,20 +38,21 @@ jobs:
           VITE_APPS_SCRIPT_URL: ${{ secrets.VITE_APPS_SCRIPT_URL }}
           VITE_WRITE_SECRET: ${{ secrets.VITE_WRITE_SECRET }}
 
-      # Password protection temporarily disabled — site is served unencrypted.
-      # To re-enable, uncomment this step (it encrypts index.html behind the
-      # staticrypt password prompt).
-      # - name: Encrypt index.html with staticrypt
-      #   run: |
-      #     npx -y staticrypt dist/index.html \
-      #       -p "$STATICRYPT_PASSWORD" \
-      #       --short --remember 30 \
-      #       -d dist-encrypted
-      #     mv dist/index.html dist/index.html.plain
-      #     mv dist-encrypted/index.html dist/index.html
-      #     rm -f dist/index.html.plain
-      #   env:
-      #     STATICRYPT_PASSWORD: ${{ secrets.STATICRYPT_PASSWORD }}
+      # Password-protect the site: encrypt index.html (all JS/CSS is inlined into
+      # it in prod) behind the staticrypt prompt. Password comes from a GitHub
+      # secret — never committed. This is what keeps the sheet ID + API key (baked
+      # into the bundle) unreadable without the password.
+      - name: Encrypt index.html with staticrypt
+        run: |
+          npx -y staticrypt dist/index.html \
+            -p "$STATICRYPT_PASSWORD" \
+            --short --remember 30 \
+            -d dist-encrypted
+          mv dist/index.html dist/index.html.plain
+          mv dist-encrypted/index.html dist/index.html
+          rm -f dist/index.html.plain
+        env:
+          STATICRYPT_PASSWORD: ${{ secrets.STATICRYPT_PASSWORD }}
 
       - uses: actions/configure-pages@v4
 

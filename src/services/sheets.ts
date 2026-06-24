@@ -216,7 +216,7 @@ export async function fetchTripData(force = false): Promise<TripData> {
   try {
     const [overviewRows, scheduleRows, hotelRows, transportRows, attractionRows, restaurantRows, shoppingRows, bookmarkRows] =
       await Promise.all([
-        fetchSheet('Overview'),
+        fetchSheet('Overview').catch(() => [] as string[][]),
         fetchSheet('Schedule'),
         fetchSheet('Hotels'),
         fetchSheet('Transport'),

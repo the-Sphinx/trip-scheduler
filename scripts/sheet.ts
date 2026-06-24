@@ -2,7 +2,20 @@ import { google } from 'googleapis';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 
-const SHEET_ID = '1P0pucbfoJFnqnnAX1dEjmDq96TGTJb7Qz66sPZiGIGc';
+// Sheet ID is NOT hardcoded here (this repo is public). Read it from .env
+// (gitignored) — the same VITE_GOOGLE_SHEET_ID the app build uses.
+function readSheetId(): string {
+  const fromEnv = process.env.SHEET_ID || process.env.VITE_GOOGLE_SHEET_ID;
+  if (fromEnv) return fromEnv;
+  try {
+    const env = readFileSync(resolve(import.meta.dirname, '../.env'), 'utf-8');
+    const m = /^VITE_GOOGLE_SHEET_ID=(.*)$/m.exec(env);
+    if (m) return m[1].trim().replace(/^['"]|['"]$/g, '');
+  } catch { /* no .env */ }
+  throw new Error('Sheet ID not found — set VITE_GOOGLE_SHEET_ID in .env');
+}
+
+const SHEET_ID = readSheetId();
 const CREDENTIALS_PATH = resolve(import.meta.dirname, '../credentials.json');
 
 async function getSheets() {

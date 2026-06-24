@@ -14,7 +14,7 @@ A PWA for a Japan trip (Jun 25 – Jul 5, 2026, 4 travelers) built with React + 
 - **Deploy**: GitHub Pages via GitHub Actions (`.github/workflows/deploy.yml`)
 
 ## Google Sheet
-- **Sheet ID**: `1P0pucbfoJFnqnnAX1dEjmDq96TGTJb7Qz66sPZiGIGc`
+- **Sheet ID**: stored in `.env` as `VITE_GOOGLE_SHEET_ID` (gitignored) + a GitHub Actions secret — never committed (repo is public).
 - **Service Account**: credentials in `credentials.json` (gitignored)
 - **Management script**: `npx tsx scripts/sheet.ts <read|append|clear> <TabName> [data]`
 
@@ -79,7 +79,7 @@ scripts/
 ## Environment Variables (.env)
 ```
 VITE_GOOGLE_SHEETS_API_KEY=...   # For runtime read (public sheet)
-VITE_GOOGLE_SHEET_ID=1P0pucbfoJFnqnnAX1dEjmDq96TGTJb7Qz66sPZiGIGc
+VITE_GOOGLE_SHEET_ID=...          # the spreadsheet id (keep out of git)
 VITE_GOOGLE_MAPS_API_KEY=...     # Google Maps JS API
 VITE_OPENWEATHER_API_KEY=...     # OpenWeatherMap free tier
 ```

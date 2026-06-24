@@ -11,14 +11,20 @@
 //        - Who has access: Anyone   (NOT "Anyone with Google account")
 //   5. Copy the /exec URL, paste into the app's VITE_APPS_SCRIPT_URL env
 
-const SHEET_ID = '1P0pucbfoJFnqnnAX1dEjmDq96TGTJb7Qz66sPZiGIGc';
-const SECRET = 'AdaDenizTrip2026';
+// Secrets live in Script Properties (Project Settings → Script properties),
+// NOT in this file — this repo is public. Set two properties:
+//   SHEET_ID  = the spreadsheet id
+//   SECRET    = the shared write secret (must match the app's VITE_WRITE_SECRET)
+const PROPS = PropertiesService.getScriptProperties();
+const SHEET_ID = PROPS.getProperty('SHEET_ID');
+const SECRET = PROPS.getProperty('SECRET');
 
 // Run this once from the editor to grant the Drive permission the upload
 // feature needs (approve the consent prompt when asked). Safe to re-run.
 function setup() {
   const folder = getOrCreateFolder_('TripBookmarks');
   Logger.log('Drive folder ready: %s (%s)', folder.getName(), folder.getId());
+  Logger.log('SHEET_ID prop set: %s · SECRET prop set: %s', !!SHEET_ID, !!SECRET);
 }
 
 function doPost(e) {
