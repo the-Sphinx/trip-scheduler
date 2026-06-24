@@ -26,11 +26,50 @@ const categoryIcons: Record<string, string> = {
   other: '📌',
 };
 
+// Transport rows all share the `transport` category but span flights,
+// shinkansen, metros, commuter rail, taxis, buses and walks. Pick a specific
+// icon from the row text — the structured notes carry the mode in their
+// "Öneri:" (recommended mode) and "Hat:" (line ridden) lines.
+const modeWithin = (s: string): string | null => {
+  const cands: [string, RegExp][] = [
+    ['🚕', /taksi|taxi/],
+    ['🚌', /otob[üu]s|limousine|\bbus\b/],
+    ['🚶', /y[üu]r[üu]|\bwalk/],
+    ['🚇', /metro|subway|mid[oō]suji|tanimachi|sakaisuji|karasuma|t[oō]zai|marunouchi|hibiya|oedo|namboku|chiyoda|yurikamome|ginza line/],
+    ['🚆', /\bjr\b|keikyu|hankyu|keihan|yamanote|keiy|rinkai|tsukuba|s[oō]bu|ch[uū][oō]|\bline\b|train|tren|express/],
+  ];
+  let best: string | null = null;
+  let bestIdx = Infinity;
+  for (const [icon, re] of cands) {
+    const m = re.exec(s);
+    if (m && m.index < bestIdx) { bestIdx = m.index; best = icon; }
+  }
+  return best;
+};
+
+function resolveIcon(category: string, activity: string, notes: string): string {
+  if (category !== 'transport') return categoryIcons[category] || categoryIcons.other;
+  const act = activity.toLowerCase();
+  const all = `${act}\n${notes.toLowerCase()}`;
+  // The recommended mode (Öneri:) wins first — it beats incidental mentions
+  // like "…transfer to the Shinkansen gates" or "before the 08:30 Nozomi".
+  const oneri = /öneri:.*/.exec(all)?.[0];
+  const recommended = oneri ? modeWithin(oneri) : null;
+  if (recommended) return recommended;
+  if (/shinkansen|nozomi/.test(all)) return '🚄';
+  if (/\b(flight|plane|uç(ak|uş))\b/.test(all)) return '✈️';
+  if (/ferry|feribot/.test(all)) return '⛴️';
+  // Otherwise the line ridden (Hat:), then the activity verb ("Taxi to…"),
+  // then any signal anywhere.
+  const hat = /hat:.*/.exec(all)?.[0];
+  return (hat && modeWithin(hat)) || modeWithin(act) || modeWithin(all) || '🚆';
+}
+
 export default function ActivityCard({ item }: { item: ScheduleItem }) {
   const [expanded, setExpanded] = useState(false);
   const { data } = useTripData();
   const colorClass = categoryColors[item.category] || categoryColors.other;
-  const icon = categoryIcons[item.category] || categoryIcons.other;
+  const icon = resolveIcon(item.category, item.activity, item.notes);
   const resolved = resolveScheduleItem(item, data);
   const thumb = resolved.photo_url;
 
