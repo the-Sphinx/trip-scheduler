@@ -73,7 +73,10 @@ export default function ActivityCard({ item }: { item: ScheduleItem }) {
   const colorClass = categoryColors[item.category] || categoryColors.other;
   const icon = resolveIcon(item.category, item.activity, item.notes);
   const resolved = resolveScheduleItem(item, data);
-  const thumb = resolved.photo_url;
+  // Transit cards reference their destination (for the map pin / Directions),
+  // but the destination's own item shows that photo right after — so don't
+  // duplicate the image on the transport card.
+  const thumb = item.category === 'transport' ? '' : resolved.photo_url;
 
   // Slug of the linked attraction's guide, if any — shown as a link in the
   // expanded view (clicking the card still just expands/collapses).
@@ -114,7 +117,7 @@ export default function ActivityCard({ item }: { item: ScheduleItem }) {
               {item.notes && (
                 <p className={`text-blue-200 text-xs italic whitespace-pre-line ${expanded ? '' : 'line-clamp-2'}`}>{item.notes}</p>
               )}
-              {resolved.notes && (
+              {resolved.notes && item.category !== 'transport' && (
                 <p className={`text-blue-200 text-xs italic whitespace-pre-line ${expanded ? '' : 'line-clamp-2'}`}>{resolved.notes}</p>
               )}
             </div>
