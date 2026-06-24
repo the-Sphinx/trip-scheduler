@@ -196,7 +196,13 @@ export default function DailySchedule() {
                   const prev = i > 0 ? day.items[i - 1] : null;
                   const prevR = prev ? resolveScheduleItem(prev, data) : null;
                   const r = resolveScheduleItem(item, data);
-                  const leg = prevR ? estimateLeg(prevR, r) : null;
+                  // Don't draw the rough auto-estimate next to a transport item —
+                  // that card already describes its own route + final walk, so the
+                  // estimate is redundant (and wrong: it measures the ride itself).
+                  const leg =
+                    prevR && prev && prev.category !== 'transport' && item.category !== 'transport'
+                      ? estimateLeg(prevR, r)
+                      : null;
                   // Day-opening leg: how to reach the first stop from last night's
                   // hotel. Skipped when the first item is itself a transport step
                   // (it already describes leaving the hotel).
