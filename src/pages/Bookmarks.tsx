@@ -1,4 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Zoom, Keyboard } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/zoom';
 import { useTripData } from '../context/TripDataContext';
 import type { Bookmark } from '../types';
 import { appendRow, updateRow, uploadImage, deleteBookmark as apiDeleteBookmark } from '../services/write';
@@ -115,7 +119,9 @@ export default function Bookmarks() {
   // ----- Add / edit / view modals -----
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState<LocalBookmark | null>(null);
-  const [viewing, setViewing] = useState<LocalBookmark | null>(null);
+  // Index into `sorted` (the currently filtered list) so the lightbox can page
+  // through exactly the bookmarks visible under the active filter.
+  const [viewingIdx, setViewingIdx] = useState<number | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<LocalBookmark | null>(null);
 
   // Upload a new image (from camera/library) then append a bookmark row.
@@ -249,10 +255,10 @@ export default function Bookmarks() {
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          {sorted.map((b) => (
+          {sorted.map((b, i) => (
             <button
               key={b.localId}
-              onClick={() => setViewing(b)}
+              onClick={() => setViewingIdx(i)}
               className={`group relative rounded-xl overflow-hidden bg-surface text-left aspect-square border ${b.error ? 'border-red-500/50' : 'border-transparent'}`}
             >
               <img
@@ -298,12 +304,13 @@ export default function Bookmarks() {
         />
       )}
 
-      {viewing && (
+      {viewingIdx !== null && (
         <Lightbox
-          bookmark={viewing}
-          onClose={() => setViewing(null)}
-          onEdit={() => { setEditing(viewing); setViewing(null); }}
-          onDelete={() => { setConfirmDelete(viewing); setViewing(null); }}
+          items={sorted}
+          startIndex={viewingIdx}
+          onClose={() => setViewingIdx(null)}
+          onEdit={(b) => { setEditing(b); setViewingIdx(null); }}
+          onDelete={(b) => { setConfirmDelete(b); setViewingIdx(null); }}
         />
       )}
 
@@ -565,40 +572,81 @@ function SourceButton({ icon, label, onClick }: { icon: string; label: string; o
 }
 
 // ---------------- Lightbox (full image view) ----------------
-function Lightbox({ bookmark, onClose, onEdit, onDelete }: { bookmark: LocalBookmark; onClose: () => void; onEdit: () => void; onDelete: () => void }) {
+// Swipeable, pinch/double-tap-to-zoom gallery. Pages through `items` (the
+// currently filtered list), so e.g. filtering by "food" then opening one image
+// lets you flip through only the food bookmarks.
+function Lightbox({ items, startIndex, onClose, onEdit, onDelete }: {
+  items: LocalBookmark[];
+  startIndex: number;
+  onClose: () => void;
+  onEdit: (b: LocalBookmark) => void;
+  onDelete: (b: LocalBookmark) => void;
+}) {
+  const [active, setActive] = useState(startIndex);
+  const b = items[active];
+
+  // Esc closes (arrows are handled by Swiper's keyboard module).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  if (!b) return null;
   return (
-    <div className="fixed inset-0 bg-black/90 z-[60] flex flex-col" onClick={onClose}>
-      <div className="flex-1 flex items-center justify-center p-4 min-h-0 overflow-hidden" onClick={onClose}>
-        {/* Normally bound by the container (max-w/h-full) so the whole image is
-            visible. When rotated 90/270 the bounding box swaps, so fall back to
-            swapped viewport bounds to keep it on screen. */}
-        <img
-          src={bookmark.localPreview || bookmark.image_url}
-          alt={bookmark.caption || ''}
-          className="object-contain transition-transform max-w-full max-h-full"
-          style={
-            bookmark.rotation === 90 || bookmark.rotation === 270
-              ? { transform: `rotate(${bookmark.rotation}deg)`, maxWidth: '90vh', maxHeight: '90vw' }
-              : bookmark.rotation
-              ? { transform: `rotate(${bookmark.rotation}deg)` }
-              : undefined
-          }
-          onClick={(e) => e.stopPropagation()}
-        />
+    <div className="fixed inset-0 z-[60] bg-black flex flex-col">
+      {/* Top bar */}
+      <div className="flex items-center justify-between px-4 py-3 text-white bg-black/60">
+        <span className="text-xs text-white/60">{active + 1} / {items.length}</span>
+        <button onClick={onClose} aria-label="Close" className="w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center text-lg leading-none">✕</button>
       </div>
-      <div className="bg-surface/95 backdrop-blur p-4 pb-6 space-y-2" onClick={(e) => e.stopPropagation()}>
-        {bookmark.category && (
-          <span className={`inline-block text-[10px] px-2 py-0.5 rounded-full border ${categoryStyle(bookmark.category)}`}>{bookmark.category}</span>
+
+      <Swiper
+        modules={[Zoom, Keyboard]}
+        zoom={{ maxRatio: 4 }}
+        keyboard={{ enabled: true }}
+        initialSlide={startIndex}
+        spaceBetween={24}
+        onSlideChange={(s) => setActive(s.activeIndex)}
+        className="flex-1 min-h-0 w-full"
+      >
+        {items.map((bm) => (
+          <SwiperSlide key={bm.localId}>
+            <div className="swiper-zoom-container w-full h-full flex items-center justify-center">
+              <img
+                src={bm.localPreview || bm.image_url}
+                alt={bm.caption || ''}
+                className="max-w-full max-h-full object-contain"
+                // Rotated 90/270 swaps the bounding box, so cap with swapped
+                // viewport bounds to keep it on screen.
+                style={
+                  bm.rotation === 90 || bm.rotation === 270
+                    ? { transform: `rotate(${bm.rotation}deg)`, maxWidth: '90vh', maxHeight: '90vw' }
+                    : bm.rotation
+                    ? { transform: `rotate(${bm.rotation}deg)` }
+                    : undefined
+                }
+              />
+            </div>
+          </SwiperSlide>
+        ))}
+      </Swiper>
+
+      {/* Metadata + actions for the active image */}
+      <div className="bg-surface/95 backdrop-blur p-4 pb-6 space-y-2">
+        {b.category && (
+          <span className={`inline-block text-[10px] px-2 py-0.5 rounded-full border ${categoryStyle(b.category)}`}>{b.category}</span>
         )}
-        {bookmark.caption && <p className="text-sm">{bookmark.caption}</p>}
+        {b.caption && <p className="text-sm">{b.caption}</p>}
         <div className="flex items-center gap-3 pt-1">
-          {bookmark.link && (
-            <a href={bookmark.link} target="_blank" rel="noopener noreferrer" className="text-sm text-primary-light underline truncate">🔗 Open link</a>
+          {b.link && (
+            <a href={b.link} target="_blank" rel="noopener noreferrer" className="text-sm text-primary-light underline truncate">🔗 Open link</a>
           )}
           <div className="flex-1" />
-          <button onClick={onEdit} className="text-sm px-3 py-1.5 rounded hover:bg-surface-light">✏️ Edit</button>
-          <button onClick={onDelete} className="text-sm px-3 py-1.5 rounded text-red-300 hover:bg-red-500/10">🗑️ Delete</button>
+          <button onClick={() => onEdit(b)} className="text-sm px-3 py-1.5 rounded hover:bg-surface-light">✏️ Edit</button>
+          <button onClick={() => onDelete(b)} className="text-sm px-3 py-1.5 rounded text-red-300 hover:bg-red-500/10">🗑️ Delete</button>
         </div>
+        <p className="text-center text-text-muted text-[11px] pt-0.5">Pinch / double-tap to zoom · swipe ← → for prev/next</p>
       </div>
     </div>
   );
