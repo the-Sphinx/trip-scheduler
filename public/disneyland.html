@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tokyo Disneyland — Ride Chooser (July 2, 2026)</title>
+<style>
+  :root{--bg:#0f172a;--card:#1e293b;--card2:#243450;--muted:#94a3b8;--text:#e8eef7;
+        --dpa:#f59e0b;--free:#34d399;--standby:#64748b;--closed:#ef4444;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding-bottom:60px}
+  header{padding:18px 16px 6px;max-width:1100px;margin:0 auto}
+  h1{font-size:22px;margin:0 0 4px}
+  .sub{color:var(--muted);font-size:13px}
+  .wrap{max-width:1100px;margin:0 auto;padding:0 16px}
+  .legend{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+  .tag{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;border:1px solid transparent}
+  .t-dpa{background:rgba(245,158,11,.18);color:var(--dpa);border-color:rgba(245,158,11,.4)}
+  .t-free{background:rgba(52,211,153,.18);color:var(--free);border-color:rgba(52,211,153,.4)}
+  .t-standby{background:rgba(100,116,139,.2);color:#cbd5e1;border-color:rgba(100,116,139,.4)}
+  .t-closed{background:rgba(239,68,68,.18);color:var(--closed);border-color:rgba(239,68,68,.4)}
+  .box{background:var(--card);border:1px solid #2b3a55;border-radius:14px;padding:14px 16px;margin:14px 0}
+  .box h2{font-size:15px;margin:0 0 8px}
+  .box p,.box li{font-size:13.5px;color:#cbd5e1}
+  details summary{cursor:pointer;font-weight:600;color:#bcd0ee}
+  .map{width:100%;height:auto;display:block;background:#0b1322;border:1px solid #2b3a55;border-radius:14px}
+  .land{margin:22px 0 8px;font-size:18px;border-left:4px solid #3b82f6;padding-left:10px}
+  .land small{color:var(--muted);font-weight:400;font-size:12px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+  .card{background:var(--card);border:1px solid #2b3a55;border-radius:14px;cursor:pointer;transition:.15s;position:relative;overflow:hidden}
+  .card:hover{background:var(--card2)}
+  .card.picked{outline:2px solid #f59e0b}
+  .card.closed{opacity:.5}
+  .thumb{height:140px;display:flex;align-items:center;justify-content:center;font-size:40px;position:relative}
+  .thumb .ptag{position:absolute;top:8px;left:8px}
+  .thumb .star{position:absolute;top:6px;right:10px;font-size:20px;color:rgba(255,255,255,.65);text-shadow:0 1px 3px #000}
+  .thumb-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
+  .thumb .ptag,.thumb .star{z-index:2}
+  .card.picked .thumb .star{color:#fde047}
+  .body{padding:11px 13px 13px}
+  .name{font-weight:700;font-size:15px;margin:0 0 6px}
+  .badges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+  .desc{font-size:13px;color:#cbd5e1;margin:0 0 8px}
+  .times{font-size:12px;color:#a8b6cc;margin:0 0 9px}
+  .links a{font-size:12px;color:#7dd3fc;text-decoration:none;margin-right:12px}
+  .links a:hover{text-decoration:underline}
+  #picks{position:sticky;top:0;z-index:5;background:rgba(15,23,42,.96);backdrop-filter:blur(6px);
+          border-bottom:1px solid #2b3a55;padding:10px 16px}
+  #picks .inner{max-width:1100px;margin:0 auto}
+  #pickList{font-size:13px;color:#fcd34d}
+  .hint{color:var(--muted);font-size:12px}
+  table.qt{width:100%;border-collapse:collapse;font-size:12.5px;margin:8px 0}
+  table.qt th,table.qt td{border:1px solid #2b3a55;padding:6px 8px;vertical-align:top;text-align:left}
+  table.qt th{background:#172033;color:#bcd0ee}
+  table.qt td.land-c{white-space:nowrap;font-weight:600;width:170px}
+  .qt-wrap{overflow-x:auto;margin:8px 0}
+  table.qt{min-width:720px}
+  table.qt td{vertical-align:top}
+  table.qt ul{margin:0;padding-left:16px}
+  table.qt li{margin:3px 0}
+  /* land thumb gradients */
+  .th-tom{background:linear-gradient(135deg,#16245e,#22397f)}
+  .th-fan{background:linear-gradient(135deg,#8f3b6d,#b85c8a)}
+  .th-toon{background:linear-gradient(135deg,#c2740f,#e0a020)}
+  .th-west{background:linear-gradient(135deg,#4f3416,#6e4a22)}
+  .th-crit{background:linear-gradient(135deg,#4aa3e0,#76c2f2)}
+  .th-adv{background:linear-gradient(135deg,#2e6b3a,#4a8f50)}
+  .th-closed{background:linear-gradient(135deg,#3b2330,#5a2b34)}
+</style>
+</head>
+<body>
+<div id="picks"><div class="inner">
+  <strong>⭐ My picks</strong> <span class="hint">— tap any ride to add/remove, then send me the list.</span>
+  <div id="pickList">None yet — tap rides below.</div>
+</div></div>
+
+<header>
+  <h1>🏰 Tokyo Disneyland — Ride Chooser</h1>
+  <div class="sub">Visit <b>Wed Jul 2, 2026</b> (9:00–21:00). Tap a ride to mark it.</div>
+  <div class="legend">
+    <span class="tag t-dpa">💴 DPA paid</span>
+    <span class="tag t-free">🎟️ FREE pass</span>
+    <span class="tag t-standby">⏳ Standby</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- PARK MAP -->
+  <h2 class="land" style="margin-top:10px">🗺️ Park map &amp; suggested loop</h2>
+  <img class="map" src="https://media2.tokyodisneyresort.jp/home/tdl/map/tdl_en_3.jpg" alt="Tokyo Disneyland official park map" referrerpolicy="no-referrer">
+  <p class="hint" style="margin:6px 2px 0">It's a ring around the central hub — from the hub: <b>LEFT</b> = Adventureland → Westernland → Critter Country, <b>RIGHT</b> = Tomorrowland, <b>STRAIGHT</b> = Fantasyland → Toontown. Adventureland &amp; Tomorrowland flank the entrance; walk the ring either way to avoid backtracking.</p>
+  <div class="hint" style="margin:8px 0 4px">Attractions by land (columns = suggested visit order, one loop) — <span style="color:var(--dpa)">·DPA</span> = paid, <span style="color:var(--free)">·free</span> = free pass, no mark = standby:</div>
+  <div class="qt-wrap"><table class="qt" id="qt"></table></div>
+  <div class="hint" style="margin-top:4px">Closed Jul 2: Space Mountain · it's a small world · Dumbo.</div>
+
+  <div class="box">
+    <details>
+      <summary>How the passes work + timing (tap)</summary>
+      <ul>
+        <li>Grab <b>DPA</b> (paid) &amp; <b>Priority Pass</b> (free) in the <b>app, after scanning in</b>. Each gives a return-time window.</li>
+        <li><b>One person books for all 4</b> (link tickets the night before).</li>
+        <li><b>DPA:</b> one at a time → next after 60 min (only 3 DPA rides). <b>Priority Pass:</b> one at a time → next after 120 min.</li>
+        <li><b>Separate systems</b> → grab <b>1 DPA + 1 free pass together</b> at tap-in.</li>
+        <li>⏱ <b>Standby times below are rough typical ranges</b> — they swing a lot by day/season; the app shows live numbers. With a DPA/free pass the wait drops to ~5–15 min.</li>
+      </ul>
+    </details>
+  </div>
+
+  <div class="box">
+    <details>
+      <summary>🗺️ Two game-plans — which land to start with (tap)</summary>
+
+      <h3 style="margin:10px 0 4px;color:var(--free)">① Recommended — start NORTH: Fantasyland + Toontown</h3>
+      <p class="hint" style="margin:0 0 6px">Everyone rope-drops <b>right into Tomorrowland</b> (Baymax/Monsters) and sprints west to Splash, so Fantasyland's headliner <b>Pooh's Hunny Hunt</b> and the dark rides build the day's worst lines by mid-morning. Clear the north first while the crowd is east.</p>
+      <ul>
+        <li><b>At tap-in</b> (one person books for all 4): free <b>Priority Pass → Pooh's Hunny Hunt</b> (longest free line) + <b>DPA → Splash Mountain</b> (¥1,500, redeem an early-afternoon window).</li>
+        <li><b>Toontown</b> at opening — Gadget's Go Coaster → Roger Rabbit → Meet Mickey (dead-end corner, fills late morning, so hit it first).</li>
+        <li><b>Fantasyland</b> — <b>Peter Pan's Flight first</b> (its standby explodes fastest), then Snow White → Pinocchio; redeem the <b>Pooh free pass</b> at its window.</li>
+        <li>When the free-pass 120-min cooldown clears, grab <b>Big Thunder Mountain</b> for later.</li>
+        <li><b>Westernland</b> — Big Thunder (free pass) + Tom Sawyer Island → <b>Critter Country</b> — Splash on your <b>DPA</b>.</li>
+        <li><b>Adventureland</b> on the way back to the exit — Pirates → Western River Railroad → Jungle Cruise.</li>
+        <li><b>Tomorrowland last</b> — late-afternoon Monsters/Buzz/Star Tours lines ease; grab a free pass if cooldown allows. (Skipping Baymax &amp; Stitch.)</li>
+      </ul>
+      <p class="hint" style="margin:6px 0 0"><b>Fallbacks:</b> Pooh free windows gone at tap-in → ride <b>Pooh standby right at opening</b> (before Toontown). · Peter Pan standby already &gt;40 min → skip, catch it end-of-day. · Running behind → drop Tom Sawyer + Western River RR first, protect Big Thunder + Splash + Pooh. · DPA Splash sold out → ride it standby first thing (go Critter → Westernland first, flip the loop clockwise).</p>
+
+      <h3 style="margin:14px 0 4px;color:var(--muted)">② The popular default — start EAST: Tomorrowland</h3>
+      <p class="hint" style="margin:0 0 6px">What most guests do: rope-drop straight to Tomorrowland for the big names, then loop counter-clockwise back to the exit.</p>
+      <ul>
+        <li><b>At tap-in:</b> free <b>Priority Pass → Monsters Inc.</b> + <b>DPA → Splash Mountain</b>.</li>
+        <li><b>Tomorrowland</b> at opening — Buzz → Monsters Inc (redeem free pass) → Star Tours. (Skip Baymax/Stitch.)</li>
+        <li><b>Fantasyland</b> — grab the <b>Pooh free pass</b> once the 120-min cooldown clears; Peter Pan / Haunted Mansion / Snow White / Pinocchio standby.</li>
+        <li><b>Toontown</b> — Gadget → Roger Rabbit → Meet Mickey.</li>
+        <li><b>Westernland</b> — Big Thunder (free pass) + Tom Sawyer → <b>Critter</b> — Splash on <b>DPA</b>.</li>
+        <li><b>Adventureland</b> on exit — Pirates → Western River RR → Jungle Cruise.</li>
+      </ul>
+      <p class="hint" style="margin:6px 0 0"><b>Trade-off vs ①:</b> you knock out the east headliners first, but you rope-drop into the <b>thickest crowd</b>, and <b>Pooh + Peter Pan standby balloon</b> while you're in Tomorrowland — so you lean harder on the Pooh free pass and may not fit Peter Pan.</p>
+    </details>
+  </div>
+
+  <h2 class="land">🚀 Tomorrowland <small>— EAST</small></h2><div class="grid" id="g-tom"></div>
+  <h2 class="land">🏰 Fantasyland <small>— NORTH / behind castle</small></h2><div class="grid" id="g-fan"></div>
+  <h2 class="land">🐭 Toontown <small>— far NORTH (kiddie zone)</small></h2><div class="grid" id="g-toon"></div>
+  <h2 class="land">🤠 Westernland <small>— WEST</small></h2><div class="grid" id="g-west"></div>
+  <h2 class="land">🦝 Critter Country <small>— far WEST (next to Westernland)</small></h2><div class="grid" id="g-crit"></div>
+  <h2 class="land">🌴 Adventureland <small>— SOUTHWEST</small></h2><div class="grid" id="g-adv"></div>
+
+</div>
+
+<script>
+// land,name,pass,emoji,height,kid,desc,duration,typicalStandby
+const RIDES = [
+ ['tom','The Happy Ride with Baymax','dpa','🤖','none','👧 kids','Gentle ride — carts pulled by Baymaxes, swinging to upbeat music. Low intensity.','~2 min','~30–70 min'],
+ ['tom','Monsters, Inc. Ride & Go Seek','free','👾','none','👧 kids','Trackless dark ride: shine your flashlight to find Monsters Inc characters. Interactive, popular.','~5 min','~40–90 min'],
+ ['tom','Buzz Lightyear\'s Astro Blasters','standby','🔫','none','👧 kids','Shooting dark ride — blast targets, compete for score. Kids love it.','~4 min','~20–50 min'],
+ ['tom','Star Tours: The Adventures Continue','free','🚀','102 cm','🎢 mild thrill','3D Star Wars motion-simulator flight — bumpy, immersive, randomized.','~7 min','~20–50 min'],
+ ['tom','Stitch Encounter','standby','🛸','none','👧 kids','Interactive live show — Stitch chats with the audience (Japanese). A/C break.','~12 min','~15–30 min'],
+
+ ['fan','Pooh\'s Hunny Hunt','free','🍯','none','👧👑 must-do','Park\'s most-loved ride — trackless honey-pot journey through the Hundred Acre Wood. Gentle, magical. Pass goes early.','~4.5 min','~50–120 min'],
+ ['fan','Haunted Mansion','free','👻','none','👧 most ok','Classic "doom buggy" dark ride — spooky-campy, not gory.','~6 min','~20–60 min'],
+ ['fan','Enchanted Tale of Beauty and the Beast','dpa','🌹','none','👧 kids','Newest headliner — trackless dancing cup through the film. Stunning. (You\'d skip.)','~9 min','~60–150 min'],
+ ['fan','Peter Pan\'s Flight','standby','🧚','none','👧 kids','Gentle suspended dark ride over London & Neverland. Standby gets long.','~3 min','~40–80 min'],
+ ['fan','Pinocchio\'s Daring Journey','standby','🪀','none','👧 ok','Short mild dark ride through the story.','~3 min','~10–30 min'],
+ ['fan','Snow White\'s Adventures','standby','🍎','none','⚠️ bit scary','Short dark ride with a few witchy/dark moments.','~2.5 min','~10–30 min'],
+ ['fan','Mickey\'s PhilharMagic','standby','🎼','none','👧 kids','4D Disney-music movie — fun for all, rarely long, A/C.','~13 min','~10–25 min'],
+ ['fan','Castle Carrousel','standby','🎠','none','👧 kids','A grand carousel.','~3 min','~5–15 min'],
+ ['fan','Alice\'s Tea Party','standby','🫖','none','👧 kids','Spinning teacups — control your own spin.','~1.5 min','~5–20 min'],
+ ['fan','Cinderella\'s Fairy Tale Hall','standby','👑','none','👧 kids','Walk-through of the castle — portraits & throne photo op.','~10 min','little/none'],
+
+ ['toon','Roger Rabbit\'s Car Toon Spin','standby','🚕','none','👧 kids','Wacky dark ride — spin your own cab. Mild.','~4 min','~20–50 min'],
+ ['toon','Gadget\'s Go Coaster','standby','🎢','none','🎢 first coaster','Tiny short kiddie coaster — perfect "first roller coaster" for a 7–8-yr-old.','~1 min','~20–40 min'],
+ ['toon','Meet Mickey / Character Houses','standby','🐭','none','👧 kids','Walk through Mickey\'s & Minnie\'s houses; meet Mickey for a photo.','~10–15 min','~20–40 min'],
+
+ ['west','Big Thunder Mountain','free','⛏️','102 cm','🎢 family coaster','Runaway mine-train coaster — fast & bumpy, no big drops/loops. Great "big" ride for a brave kid. (Free pass!)','~4 min','~30–70 min'],
+ ['west','Mark Twain Riverboat','standby','🚢','none','👧 relaxing','Scenic paddle-steamer loop. Calm rest.','~13 min','~5–20 min'],
+ ['west','Country Bear Theater','standby','🐻','none','👧 kids','Animatronic singing bears — charming, A/C sit-down.','~15 min','~5–15 min'],
+ ['west','Tom Sawyer Island Rafts','standby','🪵','none','👧 kids','Raft to an island of caves & bridges to explore. Burns energy.','~varies','~5–15 min'],
+
+ ['crit','Splash Mountain','dpa','💦','90 cm','🎢 family thrill','Log flume with a big final plunge — you WILL get wet. (DPA ¥1,500.)','~10 min','~40–90 min'],
+ ['crit','Beaver Brothers Explorer Canoes','standby','🛶','none','👧 you paddle!','Paddle a real canoe around the rivers (daytime only). Active & fun.','~10 min','~5–20 min'],
+
+ ['adv','Pirates of the Caribbean','standby','🏴‍☠️','none','👧 kids','Classic indoor boat ride through pirate scenes (incl. Jack Sparrow). Gentle, A/C — great anytime.','~15 min','~10–30 min'],
+ ['adv','Jungle Cruise: Wildlife Expeditions','standby','🐊','none','👧 kids','Boat tour past animatronic animals with a punny skipper (Japanese).','~10 min','~15–40 min'],
+ ['adv','Western River Railroad','standby','🚂','none','👧 kids','Steam-train loop with dinosaurs & canyons — scenic, A/C, restful.','~15 min','~5–20 min'],
+ ['adv','The Enchanted Tiki Room (Stitch)','standby','🦜','none','👧 kids','Animatronic singing-birds musical show with Stitch. A/C break.','~12 min','~5–15 min'],
+ ['adv','Swiss Family Treehouse','standby','🌳','none','🚶 stairs','Climb-through treehouse — many stairs, nice views. Skippable if tired.','~10 min','little/none'],
+];
+
+const picks=new Set();
+const passTag=p=>({dpa:'<span class="tag t-dpa">💴 DPA</span>',free:'<span class="tag t-free">🎟️ FREE</span>',standby:'<span class="tag t-standby">⏳ Standby</span>',closed:'<span class="tag t-closed">🚫 Closed</span>'}[p]);
+const q=s=>encodeURIComponent('Tokyo Disneyland '+s);
+
+RIDES.forEach((r,i)=>{
+  const [land,name,pass,emoji,height,kid,desc,dur,wait]=r;
+  const el=document.createElement('div');
+  el.className='card'+(pass==='closed'?' closed':'');
+  const thumbClass=pass==='closed'?'th-closed':'th-'+land;
+  const slug=name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+  const links=pass==='closed'?'':
+    `<div class="links"><a href="https://www.google.com/search?tbm=isch&q=${q(name)}" target="_blank">🔍 Photos</a>`+
+    `<a href="https://www.youtube.com/results?search_query=${q(name+' POV')}" target="_blank">▶ POV video</a></div>`;
+  el.innerHTML=`
+    <div class="thumb ${thumbClass}"><img class="thumb-img" src="disney-thumbs/${slug}.jpg" alt="" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='disney-thumbs/${slug}.png'}else{this.remove()}"><span class="star">☆</span>${emoji}</div>
+    <div class="body">
+      <div class="name">${name}</div>
+      <div class="badges">${passTag(pass)}<span class="tag t-standby">${height!=='none'&&height!=='—'?'📏 '+height:'no height min'}</span><span class="tag t-standby">${kid}</span></div>
+      <div class="desc">${desc}</div>
+      ${pass!=='closed'?`<div class="times">⏱ Ride <b>${dur}</b> · typical standby <b>${wait}</b> <span class="hint">(varies)</span></div>`:''}
+      ${links}
+    </div>`;
+  if(pass!=='closed') el.addEventListener('click',e=>{
+    if(e.target.tagName==='A')return;
+    const on=picks.has(i);
+    if(on){picks.delete(i);el.classList.remove('picked');el.querySelector('.star').textContent='☆';}
+    else{picks.add(i);el.classList.add('picked');el.querySelector('.star').textContent='★';}
+    renderPicks();
+  });
+  document.getElementById('g-'+land).appendChild(el);
+});
+
+const LANDS=[['adv','1 · Adventureland'],['west','2 · Westernland'],['crit','3 · Critter Co.'],['fan','4 · Fantasyland'],['toon','5 · Toontown'],['tom','6 · Tomorrowland']];
+const _pc=p=>p==='dpa'?' <span style="color:var(--dpa)">·DPA</span>':p==='free'?' <span style="color:var(--free)">·free</span>':'';
+const LC={adv:'linear-gradient(135deg,#2e6b3a,#4a8f50)',west:'linear-gradient(135deg,#4f3416,#6e4a22)',crit:'linear-gradient(135deg,#4aa3e0,#76c2f2)',fan:'linear-gradient(135deg,#8f3b6d,#b85c8a)',toon:'linear-gradient(135deg,#c2740f,#e0a020)',tom:'linear-gradient(135deg,#16245e,#22397f)'};
+let _h='<thead><tr>'+LANDS.map(([code,l])=>'<th style="background:'+LC[code]+';color:#fff">'+l+'</th>').join('')+'</tr></thead><tbody><tr>';
+_h+=LANDS.map(([c2])=>'<td><ul>'+RIDES.filter(r=>r[0]===c2).map(r=>'<li>'+r[1]+_pc(r[2])+'</li>').join('')+'</ul></td>').join('');
+document.getElementById('qt').innerHTML=_h+'</tr></tbody>';
+
+function renderPicks(){
+  const list=document.getElementById('pickList');
+  if(!picks.size){list.textContent='None yet — tap rides below.';return;}
+  list.innerHTML=[...picks].map(i=>{const r=RIDES[i];return `${r[3]} ${r[1]} <span style="color:#94a3b8">(${r[2]==='dpa'?'DPA':r[2]==='free'?'free':'standby'})</span>`;}).join(' &nbsp;·&nbsp; ');
+}
+</script>
+</body>
+</html>
