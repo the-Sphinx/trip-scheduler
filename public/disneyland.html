@@ -19,6 +19,8 @@
   .t-free{background:rgba(52,211,153,.18);color:var(--free);border-color:rgba(52,211,153,.4)}
   .t-standby{background:rgba(100,116,139,.2);color:#cbd5e1;border-color:rgba(100,116,139,.4)}
   .t-closed{background:rgba(239,68,68,.18);color:var(--closed);border-color:rgba(239,68,68,.4)}
+  .ln{color:#f0abfc;font-weight:700}
+  .an{color:#93c5fd;font-weight:700}
   .box{background:var(--card);border:1px solid #2b3a55;border-radius:14px;padding:14px 16px;margin:14px 0}
   .box h2{font-size:15px;margin:0 0 8px}
   .box p,.box li{font-size:13.5px;color:#cbd5e1}
@@ -36,6 +38,7 @@
   .thumb .star{position:absolute;top:6px;right:10px;font-size:20px;color:rgba(255,255,255,.65);text-shadow:0 1px 3px #000}
   .thumb-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
   .thumb .ptag,.thumb .star{z-index:2}
+  .thumb .skip-ov{position:absolute;inset:0;z-index:3;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);color:#fff;font-weight:800;font-size:24px;letter-spacing:4px;text-shadow:0 1px 4px #000}
   .card.picked .thumb .star{color:#fde047}
   .body{padding:11px 13px 13px}
   .name{font-weight:700;font-size:15px;margin:0 0 6px}
@@ -111,30 +114,32 @@
     <details>
       <summary>🗺️ Two game-plans — which land to start with (tap)</summary>
 
-      <h3 style="margin:10px 0 4px;color:var(--free)">① Recommended — start NORTH: Fantasyland + Toontown</h3>
-      <p class="hint" style="margin:0 0 6px">Everyone rope-drops <b>right into Tomorrowland</b> (Baymax/Monsters) and sprints west to Splash, so Fantasyland's headliner <b>Pooh's Hunny Hunt</b> and the dark rides build the day's worst lines by mid-morning. Clear the north first while the crowd is east.</p>
-      <ul>
-        <li><b>At tap-in</b> (one person books for all 4): free <b>Priority Pass → Pooh's Hunny Hunt</b> (longest free line) + <b>DPA → Splash Mountain</b> (¥1,500, redeem an early-afternoon window).</li>
-        <li><b>Toontown</b> at opening — Gadget's Go Coaster → Roger Rabbit → Meet Mickey (dead-end corner, fills late morning, so hit it first).</li>
-        <li><b>Fantasyland</b> — <b>Peter Pan's Flight first</b> (its standby explodes fastest), then Snow White → Pinocchio; redeem the <b>Pooh free pass</b> at its window.</li>
-        <li>When the free-pass 120-min cooldown clears, grab <b>Big Thunder Mountain</b> for later.</li>
-        <li><b>Westernland</b> — Big Thunder (free pass) + Tom Sawyer Island → <b>Critter Country</b> — Splash on your <b>DPA</b>.</li>
-        <li><b>Adventureland</b> on the way back to the exit — Pirates → Western River Railroad → Jungle Cruise.</li>
-        <li><b>Tomorrowland last</b> — late-afternoon Monsters/Buzz/Star Tours lines ease; grab a free pass if cooldown allows. (Skipping Baymax &amp; Stitch.)</li>
-      </ul>
-      <p class="hint" style="margin:6px 0 0"><b>Fallbacks:</b> Pooh free windows gone at tap-in → ride <b>Pooh standby right at opening</b> (before Toontown). · Peter Pan standby already &gt;40 min → skip, catch it end-of-day. · Running behind → drop Tom Sawyer + Western River RR first, protect Big Thunder + Splash + Pooh. · DPA Splash sold out → ride it standby first thing (go Critter → Westernland first, flip the loop clockwise).</p>
+      <p class="hint" style="margin:8px 0 2px"><span class="ln">Pink = lands</span> · <span class="an">blue = rides</span>.</p>
 
-      <h3 style="margin:14px 0 4px;color:var(--muted)">② The popular default — start EAST: Tomorrowland</h3>
-      <p class="hint" style="margin:0 0 6px">What most guests do: rope-drop straight to Tomorrowland for the big names, then loop counter-clockwise back to the exit.</p>
+      <h3 style="margin:10px 0 4px;color:var(--free)">① Recommended — start NORTH: <span class="ln">Fantasyland</span> + <span class="ln">Toontown</span></h3>
+      <p class="hint" style="margin:0 0 6px">Everyone rope-drops <b>right into <span class="ln">Tomorrowland</span></b> (<span class="an">Baymax</span>/<span class="an">Monsters</span>) and sprints west to <span class="an">Splash</span>, so <span class="ln">Fantasyland</span>'s headliner <span class="an">Pooh's Hunny Hunt</span> and the dark rides build the day's worst lines by mid-morning. Clear the north first while the crowd is east.</p>
       <ul>
-        <li><b>At tap-in:</b> free <b>Priority Pass → Monsters Inc.</b> + <b>DPA → Splash Mountain</b>.</li>
-        <li><b>Tomorrowland</b> at opening — Buzz → Monsters Inc (redeem free pass) → Star Tours. (Skip Baymax/Stitch.)</li>
-        <li><b>Fantasyland</b> — grab the <b>Pooh free pass</b> once the 120-min cooldown clears; Peter Pan / Haunted Mansion / Snow White / Pinocchio standby.</li>
-        <li><b>Toontown</b> — Gadget → Roger Rabbit → Meet Mickey.</li>
-        <li><b>Westernland</b> — Big Thunder (free pass) + Tom Sawyer → <b>Critter</b> — Splash on <b>DPA</b>.</li>
-        <li><b>Adventureland</b> on exit — Pirates → Western River RR → Jungle Cruise.</li>
+        <li><b>At tap-in</b> (one person books for all 4): free <b>Priority Pass</b> → <span class="an">Pooh's Hunny Hunt</span> (longest free line) + <b>DPA</b> → <span class="an">Splash Mountain</span> (¥1,500, redeem an early-afternoon window).</li>
+        <li><span class="ln">Toontown</span> at opening — <span class="an">Gadget's Go Coaster</span> → <span class="an">Roger Rabbit</span> → <span class="an">Meet Mickey</span> (dead-end corner, fills late morning, so hit it first).</li>
+        <li><span class="ln">Fantasyland</span> — <span class="an">Peter Pan's Flight</span> first (its standby explodes fastest), then <span class="an">Snow White</span> → <span class="an">Pinocchio</span>; redeem the <span class="an">Pooh</span> free pass at its window.</li>
+        <li>When the free-pass 120-min cooldown clears, grab <span class="an">Big Thunder Mountain</span> for later.</li>
+        <li><span class="ln">Westernland</span> — <span class="an">Big Thunder</span> (free pass) + <span class="an">Tom Sawyer Island</span> → <span class="ln">Critter Country</span> — <span class="an">Splash</span> on your <b>DPA</b>.</li>
+        <li><span class="ln">Adventureland</span> on the way back to the exit — <span class="an">Pirates</span> → <span class="an">Western River Railroad</span> → <span class="an">Jungle Cruise</span>.</li>
+        <li><span class="ln">Tomorrowland</span> last — late-afternoon <span class="an">Monsters</span>/<span class="an">Buzz</span>/<span class="an">Star Tours</span> lines ease; grab a free pass if cooldown allows. (Skipping <span class="an">Baymax</span> &amp; <span class="an">Stitch</span>.)</li>
       </ul>
-      <p class="hint" style="margin:6px 0 0"><b>Trade-off vs ①:</b> you knock out the east headliners first, but you rope-drop into the <b>thickest crowd</b>, and <b>Pooh + Peter Pan standby balloon</b> while you're in Tomorrowland — so you lean harder on the Pooh free pass and may not fit Peter Pan.</p>
+      <p class="hint" style="margin:6px 0 0"><b>Fallbacks:</b> <span class="an">Pooh</span> free windows gone at tap-in → ride <span class="an">Pooh</span> standby right at opening (before <span class="ln">Toontown</span>). · <span class="an">Peter Pan</span> standby already &gt;40 min → skip, catch it end-of-day. · Running behind → drop <span class="an">Tom Sawyer</span> + <span class="an">Western River RR</span> first, protect <span class="an">Big Thunder</span> + <span class="an">Splash</span> + <span class="an">Pooh</span>. · DPA <span class="an">Splash</span> sold out → ride it standby first thing (go <span class="ln">Critter</span> → <span class="ln">Westernland</span> first, flip the loop clockwise).</p>
+
+      <h3 style="margin:14px 0 4px;color:var(--muted)">② The popular default — start EAST: <span class="ln">Tomorrowland</span></h3>
+      <p class="hint" style="margin:0 0 6px">What most guests do: rope-drop straight to <span class="ln">Tomorrowland</span> for the big names, then loop counter-clockwise back to the exit.</p>
+      <ul>
+        <li><b>At tap-in:</b> free <b>Priority Pass</b> → <span class="an">Monsters Inc.</span> + <b>DPA</b> → <span class="an">Splash Mountain</span>.</li>
+        <li><span class="ln">Tomorrowland</span> at opening — <span class="an">Buzz</span> → <span class="an">Monsters Inc</span> (redeem free pass) → <span class="an">Star Tours</span>. (Skip <span class="an">Baymax</span>/<span class="an">Stitch</span>.)</li>
+        <li><span class="ln">Fantasyland</span> — grab the <span class="an">Pooh</span> free pass once the 120-min cooldown clears; <span class="an">Peter Pan</span> / <span class="an">Haunted Mansion</span> / <span class="an">Snow White</span> / <span class="an">Pinocchio</span> standby.</li>
+        <li><span class="ln">Toontown</span> — <span class="an">Gadget</span> → <span class="an">Roger Rabbit</span> → <span class="an">Meet Mickey</span>.</li>
+        <li><span class="ln">Westernland</span> — <span class="an">Big Thunder</span> (free pass) + <span class="an">Tom Sawyer</span> → <span class="ln">Critter</span> — <span class="an">Splash</span> on <b>DPA</b>.</li>
+        <li><span class="ln">Adventureland</span> on exit — <span class="an">Pirates</span> → <span class="an">Western River RR</span> → <span class="an">Jungle Cruise</span>.</li>
+      </ul>
+      <p class="hint" style="margin:6px 0 0"><b>Trade-off vs ①:</b> you knock out the east headliners first, but you rope-drop into the <b>thickest crowd</b>, and <span class="an">Pooh</span> + <span class="an">Peter Pan</span> standby balloon while you're in <span class="ln">Tomorrowland</span> — so you lean harder on the <span class="an">Pooh</span> free pass and may not fit <span class="an">Peter Pan</span>.</p>
     </details>
   </div>
 
@@ -196,11 +201,12 @@ RIDES.forEach((r,i)=>{
   el.className='card'+(pass==='closed'?' closed':'');
   const thumbClass=pass==='closed'?'th-closed':'th-'+land;
   const slug=name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+  const skip=/^Skip —/.test(desc);
   const links=pass==='closed'?'':
     `<div class="links"><a href="https://www.google.com/search?tbm=isch&q=${q(name)}" target="_blank">🔍 Photos</a>`+
     `<a href="https://www.youtube.com/results?search_query=${q(name+' POV')}" target="_blank">▶ POV video</a></div>`;
   el.innerHTML=`
-    <div class="thumb ${thumbClass}"><img class="thumb-img" src="disney-thumbs/${slug}.jpg" alt="" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='disney-thumbs/${slug}.png'}else{this.remove()}"><span class="star">☆</span>${emoji}</div>
+    <div class="thumb ${thumbClass}"><img class="thumb-img" src="disney-thumbs/${slug}.jpg" alt="" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='disney-thumbs/${slug}.png'}else{this.remove()}"><span class="star">☆</span>${emoji}${skip?'<span class="skip-ov">SKIP</span>':''}</div>
     <div class="body">
       <div class="name">${name}</div>
       <div class="badges">${passTag(pass)}<span class="tag t-standby">${height!=='none'&&height!=='—'?'📏 '+height:'no height min'}</span><span class="tag t-standby">${kid}</span></div>
