@@ -12,16 +12,20 @@ import Shopping from './pages/Shopping';
 import Bookmarks from './pages/Bookmarks';
 import AttractionGuidePage from './pages/AttractionGuidePage';
 
-const navItems = [
+type NavItem = { label: string; icon: string; to?: string; href?: string; external?: boolean };
+
+const navItems: NavItem[] = [
   { to: '/', label: 'Overview', icon: '🗺️' },
   { to: '/schedule', label: 'Schedule', icon: '📅' },
   { to: '/hotels', label: 'Hotels', icon: '🏨' },
   { to: '/transport', label: 'Transport', icon: '✈️' },
   { to: '/attractions', label: 'Sights', icon: '⛩️' },
-  { to: '/restaurants', label: 'Food', icon: '🍜' },
+  { href: `${import.meta.env.BASE_URL}disneyland.html`, label: 'Disney', icon: '🏰', external: true },
   { to: '/shopping', label: 'Shopping', icon: '🛍️' },
   { to: '/bookmarks', label: 'Saved', icon: '🔖' },
 ];
+
+const navItemClass = 'flex-1 min-w-0 flex flex-col items-center py-2 px-0.5 text-[10px] transition-colors';
 
 function App() {
   const { loading, error, refresh } = useTripData();
@@ -87,21 +91,32 @@ function App() {
       {/* Bottom navigation */}
       <nav className="fixed bottom-0 left-0 right-0 bg-surface border-t border-surface-light z-50">
         <div className="max-w-2xl mx-auto flex justify-around">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.to === '/'}
-              className={({ isActive }) =>
-                `flex-1 min-w-0 flex flex-col items-center py-2 px-0.5 text-[10px] transition-colors ${
-                  isActive ? 'text-primary-light' : 'text-text-muted'
-                }`
-              }
-            >
-              <span className="text-lg mb-0.5">{item.icon}</span>
-              <span className="max-w-full truncate">{item.label}</span>
-            </NavLink>
-          ))}
+          {navItems.map((item) =>
+            item.external ? (
+              <a
+                key={item.href}
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`${navItemClass} text-text-muted hover:text-primary-light`}
+              >
+                <span className="text-lg mb-0.5">{item.icon}</span>
+                <span className="max-w-full truncate">{item.label}</span>
+              </a>
+            ) : (
+              <NavLink
+                key={item.to}
+                to={item.to!}
+                end={item.to === '/'}
+                className={({ isActive }) =>
+                  `${navItemClass} ${isActive ? 'text-primary-light' : 'text-text-muted'}`
+                }
+              >
+                <span className="text-lg mb-0.5">{item.icon}</span>
+                <span className="max-w-full truncate">{item.label}</span>
+              </NavLink>
+            )
+          )}
         </div>
       </nav>
 
