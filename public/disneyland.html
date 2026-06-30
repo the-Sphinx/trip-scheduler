@@ -150,40 +150,40 @@
 <script>
 // land,name,pass,emoji,height,kid,desc,duration,typicalStandby
 const RIDES = [
- ['tom','The Happy Ride with Baymax','dpa','🤖','none','👧 kids','Gentle ride — carts pulled by Baymaxes, swinging to upbeat music. Low intensity.','~2 min','~30–70 min'],
  ['tom','Monsters, Inc. Ride & Go Seek','free','👾','none','👧 kids','Trackless dark ride: shine your flashlight to find Monsters Inc characters. Interactive, popular.','~5 min','~40–90 min'],
  ['tom','Buzz Lightyear\'s Astro Blasters','standby','🔫','none','👧 kids','Shooting dark ride — blast targets, compete for score. Kids love it.','~4 min','~20–50 min'],
  ['tom','Star Tours: The Adventures Continue','free','🚀','102 cm','🎢 mild thrill','3D Star Wars motion-simulator flight — bumpy, immersive, randomized.','~7 min','~20–50 min'],
- ['tom','Stitch Encounter','standby','🛸','none','👧 kids','Interactive live show — Stitch chats with the audience (Japanese). A/C break.','~12 min','~15–30 min'],
+ ['tom','The Happy Ride with Baymax','dpa','🤖','none','👧 kids','Skip — gentle ride, carts pulled by Baymaxes swinging to upbeat music. Low intensity.','~2 min','~30–70 min'],
+ ['tom','Stitch Encounter','standby','🛸','none','👧 kids','Skip — interactive live show, Stitch chats with the audience (Japanese). A/C break.','~12 min','~15–30 min'],
 
  ['fan','Pooh\'s Hunny Hunt','free','🍯','none','👧👑 must-do','Park\'s most-loved ride — trackless honey-pot journey through the Hundred Acre Wood. Gentle, magical. Pass goes early.','~4.5 min','~50–120 min'],
- ['fan','Haunted Mansion','free','👻','none','👧 most ok','Classic "doom buggy" dark ride — spooky-campy, not gory.','~6 min','~20–60 min'],
- ['fan','Enchanted Tale of Beauty and the Beast','dpa','🌹','none','👧 kids','Newest headliner — trackless dancing cup through the film. Stunning. (You\'d skip.)','~9 min','~60–150 min'],
  ['fan','Peter Pan\'s Flight','standby','🧚','none','👧 kids','Gentle suspended dark ride over London & Neverland. Standby gets long.','~3 min','~40–80 min'],
- ['fan','Pinocchio\'s Daring Journey','standby','🪀','none','👧 ok','Short mild dark ride through the story.','~3 min','~10–30 min'],
+ ['fan','Haunted Mansion','free','👻','none','👧 most ok','Classic "doom buggy" dark ride — spooky-campy, not gory.','~6 min','~20–60 min'],
  ['fan','Snow White\'s Adventures','standby','🍎','none','⚠️ bit scary','Short dark ride with a few witchy/dark moments.','~2.5 min','~10–30 min'],
+ ['fan','Pinocchio\'s Daring Journey','standby','🪀','none','👧 ok','Short mild dark ride through the story.','~3 min','~10–30 min'],
  ['fan','Mickey\'s PhilharMagic','standby','🎼','none','👧 kids','4D Disney-music movie — fun for all, rarely long, A/C.','~13 min','~10–25 min'],
  ['fan','Castle Carrousel','standby','🎠','none','👧 kids','A grand carousel.','~3 min','~5–15 min'],
  ['fan','Alice\'s Tea Party','standby','🫖','none','👧 kids','Spinning teacups — control your own spin.','~1.5 min','~5–20 min'],
  ['fan','Cinderella\'s Fairy Tale Hall','standby','👑','none','👧 kids','Walk-through of the castle — portraits & throne photo op.','~10 min','little/none'],
+ ['fan','Enchanted Tale of Beauty and the Beast','dpa','🌹','none','👧 kids','Skip — newest headliner, trackless dancing cup through the film. Stunning but ¥2,000 DPA.','~9 min','~60–150 min'],
 
- ['toon','Roger Rabbit\'s Car Toon Spin','standby','🚕','none','👧 kids','Wacky dark ride — spin your own cab. Mild.','~4 min','~20–50 min'],
  ['toon','Gadget\'s Go Coaster','standby','🎢','none','🎢 first coaster','Tiny short kiddie coaster — perfect "first roller coaster" for a 7–8-yr-old.','~1 min','~20–40 min'],
+ ['toon','Roger Rabbit\'s Car Toon Spin','standby','🚕','none','👧 kids','Wacky dark ride — spin your own cab. Mild.','~4 min','~20–50 min'],
  ['toon','Meet Mickey / Character Houses','standby','🐭','none','👧 kids','Walk through Mickey\'s & Minnie\'s houses; meet Mickey for a photo.','~10–15 min','~20–40 min'],
 
  ['west','Big Thunder Mountain','free','⛏️','102 cm','🎢 family coaster','Runaway mine-train coaster — fast & bumpy, no big drops/loops. Great "big" ride for a brave kid. (Free pass!)','~4 min','~30–70 min'],
- ['west','Mark Twain Riverboat','standby','🚢','none','👧 relaxing','Scenic paddle-steamer loop. Calm rest.','~13 min','~5–20 min'],
- ['west','Country Bear Theater','standby','🐻','none','👧 kids','Animatronic singing bears — charming, A/C sit-down.','~15 min','~5–15 min'],
  ['west','Tom Sawyer Island Rafts','standby','🪵','none','👧 kids','Raft to an island of caves & bridges to explore. Burns energy.','~varies','~5–15 min'],
+ ['west','Mark Twain Riverboat','standby','🚢','none','👧 relaxing','Skip — scenic paddle-steamer loop. Calm rest.','~13 min','~5–20 min'],
+ ['west','Country Bear Theater','standby','🐻','none','👧 kids','Skip — animatronic singing bears, charming A/C sit-down.','~15 min','~5–15 min'],
 
  ['crit','Splash Mountain','dpa','💦','90 cm','🎢 family thrill','Log flume with a big final plunge — you WILL get wet. (DPA ¥1,500.)','~10 min','~40–90 min'],
  ['crit','Beaver Brothers Explorer Canoes','standby','🛶','none','👧 you paddle!','Paddle a real canoe around the rivers (daytime only). Active & fun.','~10 min','~5–20 min'],
 
  ['adv','Pirates of the Caribbean','standby','🏴‍☠️','none','👧 kids','Classic indoor boat ride through pirate scenes (incl. Jack Sparrow). Gentle, A/C — great anytime.','~15 min','~10–30 min'],
- ['adv','Jungle Cruise: Wildlife Expeditions','standby','🐊','none','👧 kids','Boat tour past animatronic animals with a punny skipper (Japanese).','~10 min','~15–40 min'],
  ['adv','Western River Railroad','standby','🚂','none','👧 kids','Steam-train loop with dinosaurs & canyons — scenic, A/C, restful.','~15 min','~5–20 min'],
- ['adv','The Enchanted Tiki Room (Stitch)','standby','🦜','none','👧 kids','Animatronic singing-birds musical show with Stitch. A/C break.','~12 min','~5–15 min'],
- ['adv','Swiss Family Treehouse','standby','🌳','none','🚶 stairs','Climb-through treehouse — many stairs, nice views. Skippable if tired.','~10 min','little/none'],
+ ['adv','Jungle Cruise: Wildlife Expeditions','standby','🐊','none','👧 kids','Boat tour past animatronic animals with a punny skipper (Japanese).','~10 min','~15–40 min'],
+ ['adv','The Enchanted Tiki Room (Stitch)','standby','🦜','none','👧 kids','Skip — animatronic singing-birds musical show with Stitch. A/C break.','~12 min','~5–15 min'],
+ ['adv','Swiss Family Treehouse','standby','🌳','none','🚶 stairs','Skip — climb-through treehouse, many stairs, nice views.','~10 min','little/none'],
 ];
 
 const picks=new Set();
