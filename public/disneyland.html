@@ -21,6 +21,11 @@
   .t-closed{background:rgba(239,68,68,.18);color:var(--closed);border-color:rgba(239,68,68,.4)}
   .ln{color:#f0abfc;font-weight:700}
   .an{color:#93c5fd;font-weight:700}
+  .toplinks{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 2px}
+  .toplinks a{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:700;text-decoration:none;padding:8px 13px;border-radius:10px;border:1px solid #2b3a55;background:var(--card)}
+  .toplinks a.ticket{color:#fcd34d;border-color:rgba(252,211,77,.45)}
+  .toplinks a.guide{color:#7dd3fc;border-color:rgba(125,211,252,.45)}
+  .toplinks a:hover{background:var(--card2)}
   .box{background:var(--card);border:1px solid #2b3a55;border-radius:14px;padding:14px 16px;margin:14px 0}
   .box h2{font-size:15px;margin:0 0 8px}
   .box p,.box li{font-size:13.5px;color:#cbd5e1}
@@ -85,6 +90,7 @@
     <span class="tag t-free">🎟️ FREE pass</span>
     <span class="tag t-standby">⏳ Standby</span>
   </div>
+  <div class="toplinks" id="toplinks"></div>
 </header>
 
 <div class="wrap">
@@ -232,6 +238,16 @@ const LC={adv:'linear-gradient(135deg,#2e6b3a,#4a8f50)',west:'linear-gradient(13
 let _h='<thead><tr>'+LANDS.map(([code,l])=>'<th style="background:'+LC[code]+';color:#fff">'+l+'</th>').join('')+'</tr></thead><tbody><tr>';
 _h+=LANDS.map(([c2])=>'<td><ul>'+RIDES.filter(r=>r[0]===c2).map(r=>{const sk=/^Skip —/.test(r[6]);return '<li>'+(sk?'<b style="color:var(--closed)">[SKIP]</b> ':'')+r[1]+_pc(r[2])+'</li>';}).join('')+'</ul></td>').join('');
 document.getElementById('qt').innerHTML=_h+'</tr></tbody>';
+
+// Top links. The ticket URL is passed in by the app at runtime (?ticket=...) so
+// the Drive link is never committed to this public file; the guide opens the
+// in-app Disneyland guide (target=_top breaks out of the iframe).
+(function(){
+  const tl=document.getElementById('toplinks');
+  const tk=new URLSearchParams(location.search).get('ticket');
+  if(tk){const a=document.createElement('a');a.className='ticket';a.href=tk;a.target='_blank';a.rel='noopener';a.textContent='🎟 Park Ticket';tl.appendChild(a);}
+  const g=document.createElement('a');g.className='guide';g.href='./#/attractions/tokyo-disneyland';g.target='_top';g.textContent='📖 Disneyland Guide';tl.appendChild(g);
+})();
 
 function renderPicks(){
   const list=document.getElementById('pickList');
