@@ -10,9 +10,10 @@ import Attractions from './pages/Attractions';
 import Restaurants from './pages/Restaurants';
 import Shopping from './pages/Shopping';
 import Bookmarks from './pages/Bookmarks';
+import Disney from './pages/Disney';
 import AttractionGuidePage from './pages/AttractionGuidePage';
 
-type NavItem = { label: string; icon: string; to?: string; href?: string; external?: boolean };
+type NavItem = { label: string; icon: string; to: string };
 
 const navItems: NavItem[] = [
   { to: '/', label: 'Overview', icon: '🗺️' },
@@ -20,7 +21,7 @@ const navItems: NavItem[] = [
   { to: '/hotels', label: 'Hotels', icon: '🏨' },
   { to: '/transport', label: 'Transport', icon: '✈️' },
   { to: '/attractions', label: 'Sights', icon: '⛩️' },
-  { href: `${import.meta.env.BASE_URL}disneyland.html`, label: 'Disney', icon: '🏰', external: true },
+  { to: '/disney', label: 'Disney', icon: '🏰' },
   { to: '/shopping', label: 'Shopping', icon: '🛍️' },
   { to: '/bookmarks', label: 'Saved', icon: '🔖' },
 ];
@@ -91,32 +92,19 @@ function App() {
       {/* Bottom navigation */}
       <nav className="fixed bottom-0 left-0 right-0 bg-surface border-t border-surface-light z-50">
         <div className="max-w-2xl mx-auto flex justify-around">
-          {navItems.map((item) =>
-            item.external ? (
-              <a
-                key={item.href}
-                href={item.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`${navItemClass} text-text-muted hover:text-primary-light`}
-              >
-                <span className="text-lg mb-0.5">{item.icon}</span>
-                <span className="max-w-full truncate">{item.label}</span>
-              </a>
-            ) : (
-              <NavLink
-                key={item.to}
-                to={item.to!}
-                end={item.to === '/'}
-                className={({ isActive }) =>
-                  `${navItemClass} ${isActive ? 'text-primary-light' : 'text-text-muted'}`
-                }
-              >
-                <span className="text-lg mb-0.5">{item.icon}</span>
-                <span className="max-w-full truncate">{item.label}</span>
-              </NavLink>
-            )
-          )}
+          {navItems.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.to === '/'}
+              className={({ isActive }) =>
+                `${navItemClass} ${isActive ? 'text-primary-light' : 'text-text-muted'}`
+              }
+            >
+              <span className="text-lg mb-0.5">{item.icon}</span>
+              <span className="max-w-full truncate">{item.label}</span>
+            </NavLink>
+          ))}
         </div>
       </nav>
 
@@ -132,6 +120,7 @@ function App() {
           <Route path="/attractions/:slug" element={<AttractionGuidePage />} />
           <Route path="/restaurants" element={<Restaurants />} />
           <Route path="/shopping" element={<Shopping />} />
+          <Route path="/disney" element={<Disney />} />
           <Route path="/bookmarks" element={<Bookmarks />} />
         </Routes>
       </main>
