@@ -18,7 +18,7 @@
 // precaching hashed asset names (the single-file build has none) and uses SWR
 // for the shell so it self-heals across deploys.
 
-const VERSION = 'v1';
+const VERSION = 'v2';
 const CACHE = `trip-cache-${VERSION}`;
 const BASE = '/trip-scheduler/';
 
@@ -97,6 +97,14 @@ self.addEventListener('fetch', (event) => {
 
   if (url.origin === self.location.origin) {
     if (req.mode === 'navigate') {
+      // The Disneyland ride-chooser is a standalone static page, NOT part of the
+      // SPA — don't hand it the app shell (that's why it opened the main page on
+      // mobile). Fetch the real document, network-first so deploys stay fresh
+      // while it still works offline.
+      if (url.pathname.endsWith('/disneyland.html')) {
+        event.respondWith(networkFirst(req));
+        return;
+      }
       event.respondWith(shellStaleWhileRevalidate());
       return;
     }
