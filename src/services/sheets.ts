@@ -126,7 +126,6 @@ function parseAttraction(row: string[], headers: string[]): Attraction {
     slug: col(row, headers, 'slug'),
     place_id: col(row, headers, 'place_id'),
     images: imageList(row, headers),
-    ticket: col(row, headers, 'ticket'),
   };
 }
 

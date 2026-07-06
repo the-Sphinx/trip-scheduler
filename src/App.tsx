@@ -8,7 +8,6 @@ import Hotels from './pages/Hotels';
 import TransportPage from './pages/Transport';
 import Attractions from './pages/Attractions';
 import Restaurants from './pages/Restaurants';
-import Shopping from './pages/Shopping';
 import Bookmarks from './pages/Bookmarks';
 import Disney from './pages/Disney';
 import AttractionGuidePage from './pages/AttractionGuidePage';
@@ -22,7 +21,6 @@ const navItems: NavItem[] = [
   { to: '/transport', label: 'Transport', icon: '✈️' },
   { to: '/attractions', label: 'Sights', icon: '⛩️' },
   { to: '/disney', label: 'Disney', icon: '🏰' },
-  { to: '/shopping', label: 'Shopping', icon: '🛍️' },
   { to: '/bookmarks', label: 'Saved', icon: '🔖' },
 ];
 
@@ -119,7 +117,6 @@ function App() {
           <Route path="/attractions" element={<Attractions />} />
           <Route path="/attractions/:slug" element={<AttractionGuidePage />} />
           <Route path="/restaurants" element={<Restaurants />} />
-          <Route path="/shopping" element={<Shopping />} />
           <Route path="/disney" element={<Disney />} />
           <Route path="/bookmarks" element={<Bookmarks />} />
         </Routes>
