@@ -10,7 +10,6 @@ export interface ResolvedScheduleItem {
   notes: string;
   images: string[]; // reservation/booking document images (Drive URLs)
   place_id: string; // Google Maps place ID (exact named pin for the route)
-  ticket: string; // booked-ticket PDF (path under public/ or URL)
 }
 
 const EMPTY: ResolvedScheduleItem = {
@@ -23,7 +22,6 @@ const EMPTY: ResolvedScheduleItem = {
   notes: '',
   images: [],
   place_id: '',
-  ticket: '',
 };
 
 /**
@@ -37,7 +35,7 @@ export function resolveScheduleItem(item: ScheduleItem, data: TripData | null): 
 
   if (item.ref_type === 'attraction') {
     const a = data.attractions.find((x) => matchName(x.name));
-    if (a) return { ...EMPTY, location_name: a.name, address: a.address, lat: a.lat, lng: a.lng, photo_url: a.photo_url, website: a.website, notes: a.notes, place_id: a.place_id ?? '', images: a.images ?? [], ticket: a.ticket ?? '' };
+    if (a) return { ...EMPTY, location_name: a.name, address: a.address, lat: a.lat, lng: a.lng, photo_url: a.photo_url, website: a.website, notes: a.notes, place_id: a.place_id ?? '', images: a.images ?? [] };
   }
   if (item.ref_type === 'hotel') {
     const h = data.hotels.find((x) => matchName(x.name));
